@@ -21,8 +21,6 @@ public class FrameworkElementAdorner : Adorner
     private AdornedControl.AdornerPlacement _verticalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
     private double _offsetX = 0.0;
     private double _offsetY = 0.0;
-    private double _positionX = double.NaN;
-    private double _positionY = double.NaN;
 
     public FrameworkElementAdorner(FrameworkElement adornerChildElement, FrameworkElement adornedElement,
                                    AdornedControl.AdornerPlacement horizontalAdornerPlacement = AdornedControl.AdornerPlacement.Inside, 
@@ -302,7 +300,7 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Número de elementos hijo
     /// </summary>
-    protected override Int32 VisualChildrenCount
+    protected override int VisualChildrenCount
     {
         get { return 1; }
     }
@@ -310,7 +308,7 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Obtiene uno de los controles hijo
     /// </summary>
-    protected override Visual GetVisualChild(Int32 index)
+    protected override Visual GetVisualChild(int index)
     {
         return _child;
     }
@@ -329,32 +327,12 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Posición X del control hijo (se inicializa a NaN)
     /// </summary>
-    public double PositionX
-    {
-        get
-        {
-            return _positionX;
-        }
-        set
-        {
-            _positionX = value;
-        }
-    }
+    public double PositionX { get; set; } = double.NaN;
 
     /// <summary>
     ///     Posición X del control hijo (se inicializa a NaN)
     /// </summary>
-    public double PositionY
-    {
-        get
-        {
-            return _positionY;
-        }
-        set
-        {
-            _positionY = value;
-        }
-    }
+    public double PositionY { get; set; } = double.NaN;
 
     /// <summary>
     ///     Enumera los controles hijo
