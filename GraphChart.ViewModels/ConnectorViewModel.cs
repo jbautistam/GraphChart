@@ -23,8 +23,9 @@ public sealed class ConnectorViewModel : BaseObservableObject
     }
     // Eventos públicos
     public event EventHandler<EventArgs>? HotspotUpdated;
-
     // Variables privadas
+    private string _name = default!;
+    private ConnectorType _type = ConnectorType.Undefined;
     private ImpObservableCollection<ConnectionViewModel> _attachedConnections = new();
     private Point hotspot; // Punto o centro del conector (asociado a ConnectorItem)
 
@@ -39,8 +40,8 @@ public sealed class ConnectorViewModel : BaseObservableObject
     /// </summary>
     public string Name
     {
-        get;
-        private set;
+        get { return _name; }
+        set { CheckProperty(ref _name, value); }
     }
 
     /// <summary>
@@ -48,8 +49,8 @@ public sealed class ConnectorViewModel : BaseObservableObject
     /// </summary>
     public ConnectorType Type
     {
-        get;
-        internal set;
+        get { return _type; }
+        set { CheckProperty(ref _type, value); }
     }
 
     /// <summary>
@@ -122,7 +123,7 @@ public sealed class ConnectorViewModel : BaseObservableObject
     /// <summary>
     /// Debug checking to ensure that no connection is added to the list twice.
     /// </summary>
-    private void attachedConnections_ItemsAdded(object sender, CollectionItemsChangedEventArgs e)
+    private void attachedConnections_ItemsAdded(object? sender, CollectionItemsChangedEventArgs e)
     {
         foreach (ConnectionViewModel connection in e.Items)
         {
@@ -143,7 +144,7 @@ public sealed class ConnectorViewModel : BaseObservableObject
     /// <summary>
     /// Event raised when connections have been removed from the connector.
     /// </summary>
-    private void attachedConnections_ItemsRemoved(object sender, CollectionItemsChangedEventArgs e)
+    private void attachedConnections_ItemsRemoved(object? sender, CollectionItemsChangedEventArgs e)
     {
         foreach (ConnectionViewModel connection in e.Items)
         {
@@ -164,7 +165,7 @@ public sealed class ConnectorViewModel : BaseObservableObject
     /// <summary>
     /// Event raised when a connection attached to the connector has changed.
     /// </summary>
-    private void connection_ConnectionChanged(object sender, EventArgs e)
+    private void connection_ConnectionChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged("IsConnectionAttached");
         OnPropertyChanged("IsConnected");
