@@ -3,12 +3,12 @@
 namespace Bau.Controls.GraphChartControl.EventArguments;
 
 /// <summary>
-/// Arguments for event raised when the user starts to drag a connection out from a node.
+///     Argumentos del evento lanzado cuando el usuario comienza a arrastrar una conexión fuera de un nodo
 /// </summary>
 public class ConnectionDragStartedEventArgs : ConnectionDragEventArgs
 {
-    internal ConnectionDragStartedEventArgs(RoutedEvent routedEvent, object source, object node, object connector) :
-        base(routedEvent, source, node, null, connector)
+    internal ConnectionDragStartedEventArgs(RoutedEvent routedEvent, object source, object node, object connector) 
+        : base(routedEvent, source, node, null, connector) 
     {
     }
 }

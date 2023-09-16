@@ -3,7 +3,7 @@
 namespace Bau.Controls.GraphChartControl.EventArguments;
 
 /// <summary>
-/// Arguments for event raised while user is dragging a node in the network.
+///     Argumentos del evento lanzado mientras un usuario arrastra un nodo dentro de la red
 /// </summary>
 public class ConnectionDraggingEventArgs : ConnectionDragEventArgs
 {

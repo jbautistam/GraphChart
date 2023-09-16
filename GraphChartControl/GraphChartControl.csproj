@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Remove="Views\ConnectionDragEvents.cs" />
+    <Compile Remove="Views\ConnectorItemDragEvents.cs" />
   </ItemGroup>
 
   <ItemGroup>

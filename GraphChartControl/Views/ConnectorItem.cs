@@ -21,13 +21,13 @@ public class ConnectorItem : ContentControl
         DependencyProperty.Register("ParentNodeItem", typeof(NodeItem), typeof(ConnectorItem));
 
     internal static readonly RoutedEvent ConnectorDragStartedEvent =
-        EventManager.RegisterRoutedEvent("ConnectorDragStarted", RoutingStrategy.Bubble, typeof(ConnectorItemDragStartedEventHandler), typeof(ConnectorItem));
+        EventManager.RegisterRoutedEvent("ConnectorDragStarted", RoutingStrategy.Bubble, typeof(NetworkView.ConnectorItemDragStartedEventHandler), typeof(ConnectorItem));
 
     internal static readonly RoutedEvent ConnectorDraggingEvent =
-        EventManager.RegisterRoutedEvent("ConnectorDragging", RoutingStrategy.Bubble, typeof(ConnectorItemDraggingEventHandler), typeof(ConnectorItem));
+        EventManager.RegisterRoutedEvent("ConnectorDragging", RoutingStrategy.Bubble, typeof(NetworkView.ConnectorItemDraggingEventHandler), typeof(ConnectorItem));
 
     internal static readonly RoutedEvent ConnectorDragCompletedEvent =
-        EventManager.RegisterRoutedEvent("ConnectorDragCompleted", RoutingStrategy.Bubble, typeof(ConnectorItemDragCompletedEventHandler), typeof(ConnectorItem));
+        EventManager.RegisterRoutedEvent("ConnectorDragCompleted", RoutingStrategy.Bubble, typeof(NetworkView.ConnectorItemDragCompletedEventHandler), typeof(ConnectorItem));
 
     /// <summary>
     /// The point the mouse was last at when dragging.
@@ -180,7 +180,7 @@ public class ConnectorItem : ContentControl
             {
                 lastMousePoint = curMousePoint;
 
-                RaiseEvent(new ConnectorItemDraggingEventArgs(ConnectorDraggingEvent, this, offset.X, offset.Y));
+                RaiseEvent(new EventArguments.ConnectorItemDraggingEventArgs(ConnectorDraggingEvent, this, offset.X, offset.Y));
             }
 
             e.Handled = true;
@@ -207,7 +207,7 @@ public class ConnectorItem : ContentControl
                     //
                     // Raise an event to notify that that dragging has commenced.
                     //
-                    var eventArgs = new ConnectorItemDragStartedEventArgs(ConnectorDragStartedEvent, this);
+                    var eventArgs = new EventArguments.ConnectorItemDragStartedEventArgs(ConnectorDragStartedEvent, this);
                     RaiseEvent(eventArgs);
 
                     if (eventArgs.Cancel)
@@ -240,7 +240,7 @@ public class ConnectorItem : ContentControl
             {
                 if (isDragging)
                 {
-                    RaiseEvent(new ConnectorItemDragCompletedEventArgs(ConnectorDragCompletedEvent, this));
+                    RaiseEvent(new EventArguments.ConnectorItemDragCompletedEventArgs(ConnectorDragCompletedEvent, this));
                     
                     this.ReleaseMouseCapture();
 
@@ -277,7 +277,7 @@ public class ConnectorItem : ContentControl
             //
             // Raise ConnectorDragCompleted, with a null connector.
             //
-            RaiseEvent(new ConnectorItemDragCompletedEventArgs(ConnectorDragCompletedEvent, null));
+            RaiseEvent(new EventArguments.ConnectorItemDragCompletedEventArgs(ConnectorDragCompletedEvent, null));
 
             isLeftMouseDown = false;
             this.ReleaseMouseCapture();

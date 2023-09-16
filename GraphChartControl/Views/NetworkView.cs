@@ -14,6 +14,11 @@ namespace Bau.Controls.GraphChartControl.Views;
 /// </summary>
 public partial class NetworkView : Control
 {
+    // Delegados para los manejadores de eventos
+    internal delegate void ConnectorItemDragStartedEventHandler(object sender, EventArguments.ConnectorItemDragStartedEventArgs e);
+    internal delegate void ConnectorItemDraggingEventHandler(object sender, EventArguments.ConnectorItemDraggingEventArgs e);
+    internal delegate void ConnectorItemDragCompletedEventHandler(object sender, EventArguments.ConnectorItemDragCompletedEventArgs e);
+    // Propiedades de dependencia
     private static readonly DependencyPropertyKey NodesPropertyKey =
         DependencyProperty.RegisterReadOnly("Nodes", typeof(ImpObservableCollection<object>), typeof(NetworkView),
             new FrameworkPropertyMetadata());
