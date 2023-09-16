@@ -36,6 +36,58 @@ public sealed class ConnectorViewModel : BaseObservableObject
     }
 
     /// <summary>
+    ///     Trata el evento de datos añadidos a la conexión
+    /// </summary>
+    private void attachedConnections_ItemsAdded(object? sender, CollectionItemsChangedEventArgs e)
+    {
+        // Añade los eventos a los elementos asociados
+        foreach (ConnectionViewModel connection in e.Items)
+            connection.ConnectionChanged += new EventHandler<EventArgs>(connection_ConnectionChanged);
+        // Se ha añadido la primera conexión, indica que se debe reevaluar la conexión
+        if ((AttachedConnections.Count - e.Items.Count) == 0)
+        {
+            OnPropertyChanged("IsConnectionAttached");
+            OnPropertyChanged("IsConnected");
+        }
+    }
+
+    /// <summary>
+    ///     Trata el evento de datos eliminados a la conexión
+    /// </summary>
+    private void attachedConnections_ItemsRemoved(object? sender, CollectionItemsChangedEventArgs e)
+    {
+        // Quita los eventos a los elementos asociados
+        foreach (ConnectionViewModel connection in e.Items)
+            connection.ConnectionChanged -= new EventHandler<EventArgs>(connection_ConnectionChanged);
+        // Si no queda niguna conexión, indica que se debe reevaluar la conexión
+        if (AttachedConnections.Count == 0)
+        {
+            OnPropertyChanged("IsConnectionAttached");
+            OnPropertyChanged("IsConnected");
+        }
+    }
+
+    /// <summary>
+    ///     Evento lanzado cuando una conexión asociada se ha modificado
+    /// </summary>
+    private void connection_ConnectionChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged("IsConnectionAttached");
+        OnPropertyChanged("IsConnected");
+    }
+
+    /// <summary>
+    ///     Método al que se llama cuando se modifica el punto de entrada del conector
+    /// </summary>
+    private void OnHotspotUpdated()
+    {
+        // Lanza el evento de propiedad cambiada
+        OnPropertyChanged(nameof(Hotspot));
+        // Llama al evento
+		HotspotUpdated?.Invoke(this, EventArgs.Empty);
+	}
+
+    /// <summary>
     ///     Nombre del conector
     /// </summary>
     public string Name
@@ -52,6 +104,11 @@ public sealed class ConnectorViewModel : BaseObservableObject
         get { return _type; }
         set { CheckProperty(ref _type, value); }
     }
+
+    /// <summary>
+    ///     Nodo al que está asociado el conector o nulo si no está asociado a nada
+    /// </summary>
+    public NodeViewModel? ParentNode { get; internal set; }
 
     /// <summary>
     ///     Comprueba si el conector está conectado a otro nodo
@@ -81,104 +138,31 @@ public sealed class ConnectorViewModel : BaseObservableObject
     {
         get
         {
+            // Crea las conexiones si no existían
             if (_attachedConnections is null)
             {
                 _attachedConnections = new ImpObservableCollection<ConnectionViewModel>();
                 _attachedConnections.ItemsAdded += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsAdded);
                 _attachedConnections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsRemoved);
             }
-
+            // Devuelve las conexiones
             return _attachedConnections;
         }
     }
 
     /// <summary>
-    ///     Nodo al que está asociado el conector o nulo si no está asociado a nada
-    /// </summary>
-    public NodeViewModel? ParentNode { get; internal set; }
-
-    /// <summary>
-    /// The hotspot (or center) of the connector.
-    /// This is pushed through from ConnectorItem in the UI.
+    ///     El punto de asociación del conector. Asociado al ConnectorItem de la interface de usuario
     /// </summary>
     public Point Hotspot
     {
-        get
-        {
-            return hotspot;
-        }
+        get { return hotspot; }
         set
         {
-            if (hotspot == value)
+            if (hotspot != value)
             {
-                return;
+                hotspot = value;
+                OnHotspotUpdated();
             }
-
-            hotspot = value;
-
-            OnHotspotUpdated();
         }
     }
-
-    /// <summary>
-    /// Debug checking to ensure that no connection is added to the list twice.
-    /// </summary>
-    private void attachedConnections_ItemsAdded(object? sender, CollectionItemsChangedEventArgs e)
-    {
-        foreach (ConnectionViewModel connection in e.Items)
-        {
-            connection.ConnectionChanged += new EventHandler<EventArgs>(connection_ConnectionChanged);
-        }
-
-        if ((AttachedConnections.Count - e.Items.Count) == 0)
-        {
-            // 
-            // The first connection has been added, notify the data-binding system that
-            // 'IsConnected' should be re-evaluated.
-            //
-            OnPropertyChanged("IsConnectionAttached");
-            OnPropertyChanged("IsConnected");
-        }
-    }
-
-    /// <summary>
-    /// Event raised when connections have been removed from the connector.
-    /// </summary>
-    private void attachedConnections_ItemsRemoved(object? sender, CollectionItemsChangedEventArgs e)
-    {
-        foreach (ConnectionViewModel connection in e.Items)
-        {
-            connection.ConnectionChanged -= new EventHandler<EventArgs>(connection_ConnectionChanged);
-        }
-
-        if (AttachedConnections.Count == 0)
-        {
-            // 
-            // No longer connected to anything, notify the data-binding system that
-            // 'IsConnected' should be re-evaluated.
-            //
-            OnPropertyChanged("IsConnectionAttached");
-            OnPropertyChanged("IsConnected");
-        }
-    }
-
-    /// <summary>
-    /// Event raised when a connection attached to the connector has changed.
-    /// </summary>
-    private void connection_ConnectionChanged(object? sender, EventArgs e)
-    {
-        OnPropertyChanged("IsConnectionAttached");
-        OnPropertyChanged("IsConnected");
-    }
-
-    /// <summary>
-    ///     Método al que se llama cuando se modifica el punto de entrada del conector
-    /// </summary>
-    private void OnHotspotUpdated()
-    {
-        // Lanza el evento de propiedad cambiada
-        OnPropertyChanged("Hotspot");
-        // Llama al evento
-		HotspotUpdated?.Invoke(this, EventArgs.Empty);
-	}
 }
