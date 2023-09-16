@@ -1,207 +1,168 @@
 ﻿using System.Windows;
 
-using BauMvvm.Views.Wpf;
+using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Libraries.GraphChart.ViewModels;
 
 /// <summary>
 /// Defines a connector (aka connection point) that can be attached to a node and is used to connect the node to another node.
 /// </summary>
-public sealed class ConnectorViewModel : AbstractModelBase
+public sealed class ConnectorViewModel : BaseObservableObject
 {
     /// <summary>
-    /// Defines the type of a connector (aka connection point).
+    ///     Tipo del conector
     /// </summary>
     public enum ConnectorType
     {
+        /// <summary>Indefinido</summary>
         Undefined,
+        /// <summary>Conector de entrada</summary>
         Input,
-        Output,
+        /// <summary>Conector de salida</summary>
+        Output
     }
-
-    /// <summary>
-    /// The connections that are attached to this connector, or null if no connections are attached.
-    /// </summary>
-    private ImpObservableCollection<ConnectionViewModel> attachedConnections = null;
-
-    /// <summary>
-    /// The hotspot (or center) of the connector.
-    /// This is pushed through from ConnectorItem in the UI.
-    /// </summary>
-    private Point hotspot;
+    // Eventos públicos
+    public event EventHandler<EventArgs>? HotspotUpdated;
+    // Variables privadas
+    private string _name = default!;
+    private ConnectorType _type = ConnectorType.Undefined;
+    private ImpObservableCollection<ConnectionViewModel> _attachedConnections = new();
+    private Point hotspot; // Punto o centro del conector (asociado a ConnectorItem)
 
     public ConnectorViewModel(string name)
     {
-        this.Name = name;
-        this.Type = ConnectorType.Undefined;
+        Name = name;
+        Type = ConnectorType.Undefined;
     }
 
     /// <summary>
-    /// The name of the connector.
+    ///     Trata el evento de datos añadidos a la conexión
     /// </summary>
-    public string Name
+    private void attachedConnections_ItemsAdded(object? sender, CollectionItemsChangedEventArgs e)
     {
-        get;
-        private set;
-    }
-
-    /// <summary>
-    /// Defines the type of the connector.
-    /// </summary>
-    public ConnectorType Type
-    {
-        get;
-        internal set;
-    }
-
-    /// <summary>
-    /// Returns 'true' if the connector connected to another node.
-    /// </summary>
-    public bool IsConnected
-    {
-        get
-        {
-            foreach (var connection in AttachedConnections)
-            {
-                if (connection.SourceConnector != null &&
-                    connection.DestConnector != null)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Returns 'true' if a connection is attached to the connector.
-    /// The other end of the connection may or may not be attached to a node.
-    /// </summary>
-    public bool IsConnectionAttached
-    {
-        get
-        {
-            return AttachedConnections.Count > 0;
-        }
-    }
-
-    /// <summary>
-    /// The connections that are attached to this connector, or null if no connections are attached.
-    /// </summary>
-    public ImpObservableCollection<ConnectionViewModel> AttachedConnections
-    {
-        get
-        {
-            if (attachedConnections == null)
-            {
-                attachedConnections = new ImpObservableCollection<ConnectionViewModel>();
-                attachedConnections.ItemsAdded += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsAdded);
-                attachedConnections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsRemoved);
-            }
-
-            return attachedConnections;
-        }
-    }
-
-    /// <summary>
-    /// The parent node that the connector is attached to, or null if the connector is not attached to any node.
-    /// </summary>
-    public NodeViewModel ParentNode
-    {
-        get;
-        internal set;
-    }
-
-    /// <summary>
-    /// The hotspot (or center) of the connector.
-    /// This is pushed through from ConnectorItem in the UI.
-    /// </summary>
-    public Point Hotspot
-    {
-        get
-        {
-            return hotspot;
-        }
-        set
-        {
-            if (hotspot == value)
-            {
-                return;
-            }
-
-            hotspot = value;
-
-            OnHotspotUpdated();
-        }
-    }
-
-    /// <summary>
-    /// Event raised when the connector hotspot has been updated.
-    /// </summary>
-    public event EventHandler<EventArgs> HotspotUpdated;
-
-    /// <summary>
-    /// Debug checking to ensure that no connection is added to the list twice.
-    /// </summary>
-    private void attachedConnections_ItemsAdded(object sender, CollectionItemsChangedEventArgs e)
-    {
+        // Añade los eventos a los elementos asociados
         foreach (ConnectionViewModel connection in e.Items)
-        {
             connection.ConnectionChanged += new EventHandler<EventArgs>(connection_ConnectionChanged);
-        }
-
+        // Se ha añadido la primera conexión, indica que se debe reevaluar la conexión
         if ((AttachedConnections.Count - e.Items.Count) == 0)
         {
-            // 
-            // The first connection has been added, notify the data-binding system that
-            // 'IsConnected' should be re-evaluated.
-            //
             OnPropertyChanged("IsConnectionAttached");
             OnPropertyChanged("IsConnected");
         }
     }
 
     /// <summary>
-    /// Event raised when connections have been removed from the connector.
+    ///     Trata el evento de datos eliminados a la conexión
     /// </summary>
-    private void attachedConnections_ItemsRemoved(object sender, CollectionItemsChangedEventArgs e)
+    private void attachedConnections_ItemsRemoved(object? sender, CollectionItemsChangedEventArgs e)
     {
+        // Quita los eventos a los elementos asociados
         foreach (ConnectionViewModel connection in e.Items)
-        {
             connection.ConnectionChanged -= new EventHandler<EventArgs>(connection_ConnectionChanged);
-        }
-
+        // Si no queda niguna conexión, indica que se debe reevaluar la conexión
         if (AttachedConnections.Count == 0)
         {
-            // 
-            // No longer connected to anything, notify the data-binding system that
-            // 'IsConnected' should be re-evaluated.
-            //
             OnPropertyChanged("IsConnectionAttached");
             OnPropertyChanged("IsConnected");
         }
     }
 
     /// <summary>
-    /// Event raised when a connection attached to the connector has changed.
+    ///     Evento lanzado cuando una conexión asociada se ha modificado
     /// </summary>
-    private void connection_ConnectionChanged(object sender, EventArgs e)
+    private void connection_ConnectionChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged("IsConnectionAttached");
         OnPropertyChanged("IsConnected");
     }
 
     /// <summary>
-    /// Called when the connector hotspot has been updated.
+    ///     Método al que se llama cuando se modifica el punto de entrada del conector
     /// </summary>
     private void OnHotspotUpdated()
     {
-        OnPropertyChanged("Hotspot");
+        // Lanza el evento de propiedad cambiada
+        OnPropertyChanged(nameof(Hotspot));
+        // Llama al evento
+		HotspotUpdated?.Invoke(this, EventArgs.Empty);
+	}
 
-        if (HotspotUpdated != null)
+    /// <summary>
+    ///     Nombre del conector
+    /// </summary>
+    public string Name
+    {
+        get { return _name; }
+        set { CheckProperty(ref _name, value); }
+    }
+
+    /// <summary>
+    ///     Tipo del conector
+    /// </summary>
+    public ConnectorType Type
+    {
+        get { return _type; }
+        set { CheckProperty(ref _type, value); }
+    }
+
+    /// <summary>
+    ///     Nodo al que está asociado el conector o nulo si no está asociado a nada
+    /// </summary>
+    public NodeViewModel? ParentNode { get; internal set; }
+
+    /// <summary>
+    ///     Comprueba si el conector está conectado a otro nodo
+    /// </summary>
+    public bool IsConnected
+    {
+        get
         {
-            HotspotUpdated(this, EventArgs.Empty);
+            // Comprueba si hay una conexión origen y destino
+            foreach (ConnectionViewModel connection in AttachedConnections)
+                if (connection.SourceConnector != null && connection.DestConnector != null)
+                    return true;
+            // Si ha llegado hasta aquí es porque no ha encontrado nada
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Comrpueba si tiene alguna conexión origen o destino
+    /// </summary>
+    public bool IsConnectionAttached => AttachedConnections.Count > 0;
+
+    /// <summary>
+    ///     Conexiones asociadas al conector
+    /// </summary>
+    public ImpObservableCollection<ConnectionViewModel> AttachedConnections
+    {
+        get
+        {
+            // Crea las conexiones si no existían
+            if (_attachedConnections is null)
+            {
+                _attachedConnections = new ImpObservableCollection<ConnectionViewModel>();
+                _attachedConnections.ItemsAdded += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsAdded);
+                _attachedConnections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsRemoved);
+            }
+            // Devuelve las conexiones
+            return _attachedConnections;
+        }
+    }
+
+    /// <summary>
+    ///     El punto de asociación del conector. Asociado al ConnectorItem de la interface de usuario
+    /// </summary>
+    public Point Hotspot
+    {
+        get { return hotspot; }
+        set
+        {
+            if (hotspot != value)
+            {
+                hotspot = value;
+                OnHotspotUpdated();
+            }
         }
     }
 }

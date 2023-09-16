@@ -4,21 +4,18 @@ namespace Bau.Controls.GraphChartControl.Adorners;
 
 public delegate void AdornerEventHandler(object sender, AdornerEventArgs e);
 
+/// <summary>
+///     Argumentos del evento del adorno
+/// </summary>
 public class AdornerEventArgs : RoutedEventArgs
 {
-    private FrameworkElement adorner = null;
-
-    public AdornerEventArgs(RoutedEvent routedEvent, object source, FrameworkElement adorner) :
-        base(routedEvent, source)
+    public AdornerEventArgs(RoutedEvent routedEvent, object source, FrameworkElement adorner) : base(routedEvent, source)
     {
-        this.adorner = adorner;
+        Adorner = adorner;
     }
 
-    public FrameworkElement Adorner
-    {
-        get
-        {
-            return adorner;
-        }
-    }
+    /// <summary>
+    ///     Adorno
+    /// </summary>
+    public FrameworkElement Adorner { get; }
 }

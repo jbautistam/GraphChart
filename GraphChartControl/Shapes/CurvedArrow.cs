@@ -9,92 +9,13 @@ namespace Bau.Controls.GraphChartControl.Shapes;
 /// </summary>
 public class CurvedArrow : Shape
 {
-    public static readonly DependencyProperty ArrowHeadLengthProperty =
-        DependencyProperty.Register("ArrowHeadLength", typeof(double), typeof(CurvedArrow),
-            new FrameworkPropertyMetadata(20.0, FrameworkPropertyMetadataOptions.AffectsRender));
-
-    public static readonly DependencyProperty ArrowHeadWidthProperty =
-        DependencyProperty.Register("ArrowHeadWidth", typeof(double), typeof(CurvedArrow),
-            new FrameworkPropertyMetadata(12.0, FrameworkPropertyMetadataOptions.AffectsRender));
-
-    public static readonly DependencyProperty PointsProperty =
-        DependencyProperty.Register("Points", typeof(PointCollection), typeof(CurvedArrow),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
-
-    /// <summary>
-    /// The angle (in degrees) of the arrow head.
-    /// </summary>
-    public double ArrowHeadLength
-    {
-        get
-        {
-            return (double)GetValue(ArrowHeadLengthProperty);
-        }
-        set
-        {
-            SetValue(ArrowHeadLengthProperty, value);
-        }
-    }
-
-    /// <summary>
-    /// The width of the arrow head.
-    /// </summary>
-    public double ArrowHeadWidth
-    {
-        get
-        {
-            return (double)GetValue(ArrowHeadWidthProperty);
-        }
-        set
-        {
-            SetValue(ArrowHeadWidthProperty, value);
-        }
-    }
-
-    /// <summary>
-    /// The intermediate points that make up the line between the start and the end.
-    /// </summary>
-    public PointCollection Points
-    {
-        get
-        {
-            return (PointCollection)GetValue(PointsProperty);
-        }
-        set
-        {
-            SetValue(PointsProperty, value);
-        }
-    }
-
-    /// <summary>
-    /// Return the shape's geometry.
-    /// </summary>
-    protected override Geometry DefiningGeometry
-    {
-        get
-        {
-            if (Points == null || Points.Count < 2)
-            {
-                return new GeometryGroup();
-            }
-
-            //
-            // Geometry has not yet been generated.
-            // Generate geometry and cache it.
-            //
-            Geometry geometry = GenerateGeometry();
-
-            GeometryGroup group = new GeometryGroup();
-            group.Children.Add(geometry);
-
-            GenerateArrowHeadGeometry(group);
-
-            //
-            // Return cached geometry.
-            //
-            return group;
-        }
-    }
+    // Propiedades de dependencia
+    public static readonly DependencyProperty ArrowHeadLengthProperty = DependencyProperty.Register(nameof(ArrowHeadLength), typeof(double), typeof(CurvedArrow),
+                                                                                                    new FrameworkPropertyMetadata(20.0, FrameworkPropertyMetadataOptions.AffectsRender));
+    public static readonly DependencyProperty ArrowHeadWidthProperty = DependencyProperty.Register(nameof(ArrowHeadWidth), typeof(double), typeof(CurvedArrow),
+                                                                                                   new FrameworkPropertyMetadata(12.0, FrameworkPropertyMetadataOptions.AffectsRender));
+    public static readonly DependencyProperty PointsProperty = DependencyProperty.Register(nameof(Points), typeof(PointCollection), typeof(CurvedArrow),
+                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>
     /// Generate the geometry for the three optional arrow symbols at the start, middle and end of the arrow.
@@ -102,14 +23,12 @@ public class CurvedArrow : Shape
     private void GenerateArrowHeadGeometry(GeometryGroup geometryGroup)
     {
         Point startPoint = Points[0];
-
         Point penultimatePoint = Points[Points.Count - 2];
         Point arrowHeadTip = Points[Points.Count - 1];
         Vector startDir = arrowHeadTip - penultimatePoint;
         startDir.Normalize();
         Point basePoint = arrowHeadTip - (startDir * ArrowHeadLength);
         Vector crossDir = new Vector(-startDir.Y, startDir.X);
-
         Point[] arrowHeadPoints = new Point[3];
         arrowHeadPoints[0] = arrowHeadTip;
         arrowHeadPoints[1] = basePoint - (crossDir * (ArrowHeadWidth / 2));
@@ -132,75 +51,128 @@ public class CurvedArrow : Shape
     }
 
     /// <summary>
-    /// Generate the shapes geometry.
+    ///     Genera la geometría de la figura
     /// </summary>
     protected Geometry GenerateGeometry()
     {
-        PathGeometry pathGeometry = new PathGeometry();
+        PathGeometry pathGeometry = new();
 
-        if (Points.Count == 2 || Points.Count == 3)
-        {
-            // Make a straight line.
-            PathFigure fig = new PathFigure();
-            fig.IsClosed = false;
-            fig.IsFilled = false;
-            fig.StartPoint = Points[0];
-
-            for (int i = 1; i < Points.Count; ++i)
+            if (Points.Count == 2 || Points.Count == 3)
             {
-                fig.Segments.Add(new LineSegment(Points[i], true));
+                // Make a straight line.
+                PathFigure figure = new();
+
+                    // Crea una línea recta
+                    figure.IsClosed = false;
+                    figure.IsFilled = false;
+                    figure.StartPoint = Points[0];
+
+                    for (int i = 1; i < Points.Count; ++i)
+                        figure.Segments.Add(new LineSegment(Points[i], true));
+
+                    pathGeometry.Figures.Add(figure);
             }
-
-            pathGeometry.Figures.Add(fig);
-        }
-        else
-        {
-            PointCollection adjustedPoints = new PointCollection();
-            adjustedPoints.Add(Points[0]);
-            for (int i = 1; i < Points.Count; ++i)
+            else
             {
-                adjustedPoints.Add(Points[i]);
-            }
-
-            if (adjustedPoints.Count == 4)
-            {
-                // Make a curved line.
-                PathFigure fig = new PathFigure();
-                fig.IsClosed = false;
-                fig.IsFilled = false;
-                fig.StartPoint = adjustedPoints[0];
-                fig.Segments.Add(new BezierSegment(adjustedPoints[1], adjustedPoints[2], adjustedPoints[3], true));
-
-                pathGeometry.Figures.Add(fig);
-            }
-            else if (adjustedPoints.Count >= 5)
-            {
-                // Make a curved line.
-                PathFigure fig = new PathFigure();
-                fig.IsClosed = false;
-                fig.IsFilled = false;
-                fig.StartPoint = adjustedPoints[0];
-
-                adjustedPoints.RemoveAt(0);
-
-                while (adjustedPoints.Count > 3)
+                PointCollection adjustedPoints = new PointCollection();
+                adjustedPoints.Add(Points[0]);
+                for (int i = 1; i < Points.Count; ++i)
                 {
-                    Point generatedPoint = adjustedPoints[1] + ((adjustedPoints[2] - adjustedPoints[1]) / 2);
-
-                    fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[1], generatedPoint, true));
-
-                    adjustedPoints.RemoveAt(0);
-                    adjustedPoints.RemoveAt(0);
+                    adjustedPoints.Add(Points[i]);
                 }
 
-                if (adjustedPoints.Count == 2)
-                    fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[0], adjustedPoints[1], true));
-                else
-                    fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[1], adjustedPoints[2], true));
+                if (adjustedPoints.Count == 4)
+                {
+                    PathFigure fig = new PathFigure();
 
-                pathGeometry.Figures.Add(fig);
+                    // Crea una línea curva
+                    fig.IsClosed = false;
+                    fig.IsFilled = false;
+                    fig.StartPoint = adjustedPoints[0];
+                    fig.Segments.Add(new BezierSegment(adjustedPoints[1], adjustedPoints[2], adjustedPoints[3], true));
+
+                    pathGeometry.Figures.Add(fig);
+                }
+                else if (adjustedPoints.Count >= 5)
+                {
+                    PathFigure fig = new PathFigure();
+
+                    // Crea una línea curva
+                    fig.IsClosed = false;
+                    fig.IsFilled = false;
+                    fig.StartPoint = adjustedPoints[0];
+
+                    adjustedPoints.RemoveAt(0);
+
+                    while (adjustedPoints.Count > 3)
+                    {
+                        Point generatedPoint = adjustedPoints[1] + ((adjustedPoints[2] - adjustedPoints[1]) / 2);
+
+                        fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[1], generatedPoint, true));
+
+                        adjustedPoints.RemoveAt(0);
+                        adjustedPoints.RemoveAt(0);
+                    }
+
+                    if (adjustedPoints.Count == 2)
+                        fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[0], adjustedPoints[1], true));
+                    else
+                        fig.Segments.Add(new BezierSegment(adjustedPoints[0], adjustedPoints[1], adjustedPoints[2], true));
+
+                    pathGeometry.Figures.Add(fig);
+                }
+            }
+            return pathGeometry;
+    }
+
+    /// <summary>
+    ///     Angulo en grados de la punta de la flecha
+    /// </summary>
+    public double ArrowHeadLength
+    {
+        get { return (double) GetValue(ArrowHeadLengthProperty); }
+        set { SetValue(ArrowHeadLengthProperty, value); }
+    }
+
+    /// <summary>
+    ///     Ancho de la punta de la flecha
+    /// </summary>
+    public double ArrowHeadWidth
+    {
+        get { return (double) GetValue(ArrowHeadWidthProperty); }
+        set { SetValue(ArrowHeadWidthProperty, value); }
+    }
+
+    /// <summary>
+    ///     Puntos intermedios que conforman la línea entre el inicio y el final
+    /// </summary>
+    public PointCollection Points
+    {
+        get { return (PointCollection) GetValue(PointsProperty); }
+        set { SetValue(PointsProperty, value); }
+    }
+
+    /// <summary>
+    ///     Obtiene la geometría de la figura
+    /// </summary>
+    protected override Geometry DefiningGeometry
+    {
+        get
+        {
+            if (Points is null || Points.Count < 2)
+                return new GeometryGroup();
+            else
+            {
+                GeometryGroup group = new();
+                Geometry geometry = GenerateGeometry();
+
+                    // Añade la geometría al group
+                    group.Children.Add(geometry);
+                    // Añade la punta de la flcha a la geometría
+                    GenerateArrowHeadGeometry(group);
+                    // Devuelve la geometría cacheada
+                    return group;
             }
         }
-        return pathGeometry;
     }
 }

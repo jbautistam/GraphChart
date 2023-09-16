@@ -15,17 +15,26 @@ namespace Bau.Controls.GraphChartControl.Adorners;
 public class AdornedControl : ContentControl
 {
     /// <summary>
-    /// Specifies the placement of the adorner in related to the adorned control.
+    ///     Definición donde se coloca el <see cref="Adorner"/> en relación con el control adornado
     /// </summary>
     public enum AdornerPlacement
     {
         Inside,
         Outside,
-        Mouse,
+        Mouse
     }
+
     /// <summary>
-    /// Dependency properties.
+    /// Specifies the current show/hide state of the adorner.
     /// </summary>
+    private enum AdornerShowState
+    {
+        Visible,
+        Hidden,
+        FadingIn,
+        FadingOut,
+    }
+    // Propiedades de dependencia
     public static readonly DependencyProperty IsAdornerVisibleProperty =
         DependencyProperty.Register("IsAdornerVisible", typeof(bool), typeof(AdornedControl),
             new FrameworkPropertyMetadata(IsAdornerVisible_PropertyChanged));
@@ -73,13 +82,16 @@ public class AdornedControl : ContentControl
     public static readonly RoutedEvent AdornerHiddenEvent =
         EventManager.RegisterRoutedEvent("AdornerHidden", RoutingStrategy.Bubble, typeof(AdornerEventHandler), typeof(AdornedControl));
 
-    /// <summary>
-    /// Commands.
-    /// </summary>
-    public static readonly RoutedCommand ShowAdornerCommand = new RoutedCommand("ShowAdorner", typeof(AdornedControl));
-    public static readonly RoutedCommand FadeInAdornerCommand = new RoutedCommand("FadeInAdorner", typeof(AdornedControl));
-    public static readonly RoutedCommand HideAdornerCommand = new RoutedCommand("HideAdorner", typeof(AdornedControl));
-    public static readonly RoutedCommand FadeOutAdornerCommand = new RoutedCommand("FadeOutAdorner", typeof(AdornedControl));
+    // Comandos
+    public static readonly RoutedCommand ShowAdornerCommand = new("ShowAdorner", typeof(AdornedControl));
+    public static readonly RoutedCommand FadeInAdornerCommand = new("FadeInAdorner", typeof(AdornedControl));
+    public static readonly RoutedCommand HideAdornerCommand = new("HideAdorner", typeof(AdornedControl));
+    public static readonly RoutedCommand FadeOutAdornerCommand = new("FadeOutAdorner", typeof(AdornedControl));
+    // Vínculos del comando
+    private static readonly CommandBinding ShowAdornerCommandBinding = new(ShowAdornerCommand, ShowAdornerCommand_Executed);
+    private static readonly CommandBinding FadeInAdornerCommandBinding = new(FadeInAdornerCommand, FadeInAdornerCommand_Executed);
+    private static readonly CommandBinding HideAdornerCommandBinding = new(HideAdornerCommand, HideAdornerCommand_Executed);
+    private static readonly CommandBinding FadeOutAdornerCommandBinding = new(FadeInAdornerCommand, FadeOutAdornerCommand_Executed);
 
     public AdornedControl()
     {
@@ -321,7 +333,7 @@ public class AdornedControl : ContentControl
     {
         get
         {
-            return (double)GetValue(CloseAdornerTimeOutProperty);
+            return (double) GetValue(CloseAdornerTimeOutProperty);
         }
         set
         {
@@ -342,7 +354,7 @@ public class AdornedControl : ContentControl
     {
         get
         {
-            return (string)GetValue(AdornedTemplatePartNameProperty);
+            return (string) GetValue(AdornedTemplatePartNameProperty);
         }
         set
         {
@@ -366,25 +378,6 @@ public class AdornedControl : ContentControl
     {
         add { AddHandler(AdornerHiddenEvent, value); }
         remove { RemoveHandler(AdornerHiddenEvent, value); }
-    }
-
-    /// <summary>
-    /// Command bindings.
-    /// </summary>
-    private static readonly CommandBinding ShowAdornerCommandBinding = new CommandBinding(ShowAdornerCommand, ShowAdornerCommand_Executed);
-    private static readonly CommandBinding FadeInAdornerCommandBinding = new CommandBinding(FadeInAdornerCommand, FadeInAdornerCommand_Executed);
-    private static readonly CommandBinding HideAdornerCommandBinding = new CommandBinding(HideAdornerCommand, HideAdornerCommand_Executed);
-    private static readonly CommandBinding FadeOutAdornerCommandBinding = new CommandBinding(FadeInAdornerCommand, FadeOutAdornerCommand_Executed);
-
-    /// <summary>
-    /// Specifies the current show/hide state of the adorner.
-    /// </summary>
-    private enum AdornerShowState
-    {
-        Visible,
-        Hidden,
-        FadingIn,
-        FadingOut,
     }
 
     /// <summary>
@@ -431,10 +424,8 @@ public class AdornedControl : ContentControl
     /// </summary>
     private void UpdateAdornerDataContext()
     {
-        if (this.AdornerContent != null)
-        {
-            this.AdornerContent.DataContext = this.DataContext;
-        }
+        if (AdornerContent != null)
+            AdornerContent.DataContext = DataContext;
     }
 
     /// <summary>
@@ -554,13 +545,9 @@ public class AdornedControl : ContentControl
     private void ShowOrHideAdornerInternal()
     {
         if (IsAdornerVisible)
-        {
             ShowAdornerInternal();
-        }
         else
-        {
             HideAdornerInternal();
-        }
     }
 
     /// <summary>
@@ -575,15 +562,11 @@ public class AdornedControl : ContentControl
             DependencyObject child = VisualTreeHelper.GetChild(rootElement, i);
             FrameworkElement childElement = child as FrameworkElement;
             if (childElement != null && childElement.Name == childName)
-            {
                 return childElement;
-            }
 
             FrameworkElement foundElement = FindNamedChild(childElement, childName);
             if (foundElement != null)
-            {
                 return foundElement;
-            }
         }
 
         return null;
@@ -595,7 +578,7 @@ public class AdornedControl : ContentControl
     /// </summary>
     private void ShowAdornerInternal()
     {
-        if (this.adorner != null)
+        if (adorner != null)
         {
             // Already adorned.
             return;
@@ -603,7 +586,7 @@ public class AdornedControl : ContentControl
 
         AddAdorner();
 
-        RaiseEvent(new AdornerEventArgs(AdornerShownEvent, this, this.adorner.Child));
+        RaiseEvent(new AdornerEventArgs(AdornerShownEvent, this, adorner.Child));
     }
 
     /// <summary>
@@ -611,13 +594,13 @@ public class AdornedControl : ContentControl
     /// </summary>
     private void HideAdornerInternal()
     {
-        if (this.adornerLayer == null || this.adorner == null)
+        if (adornerLayer == null || adorner == null)
         {
             // Not already adorned.
             return;
         }
 
-        RaiseEvent(new AdornerEventArgs(AdornerHiddenEvent, this, this.adorner.Child));
+        RaiseEvent(new AdornerEventArgs(AdornerHiddenEvent, this, adorner.Child));
 
         RemoveAdorner();
     }
@@ -658,9 +641,7 @@ public class AdornedControl : ContentControl
     private void MouseEnterLogic()
     {
         if (!IsMouseOverShowEnabled)
-        {
             return;
-        }
 
         closeAdornerTimer.Stop();
 
@@ -673,9 +654,7 @@ public class AdornedControl : ContentControl
     private void MouseLeaveLogic()
     {
         if (!IsMouseOverShowEnabled)
-        {
             return;
-        }
 
         closeAdornerTimer.Start();
     }
@@ -711,7 +690,7 @@ public class AdornedControl : ContentControl
         if (adornerShowState == AdornerShowState.FadingOut)
         {
             // Still fading out, eg it wasn't aborted.
-            this.HideAdorner();
+            HideAdorner();
         }
     }
 
@@ -720,41 +699,37 @@ public class AdornedControl : ContentControl
     /// </summary>
     private void AddAdorner()
     {
-        if (this.AdornerContent != null)
+        if (AdornerContent != null)
         {
-            if (this.adornerLayer == null)
-            {
-                this.adornerLayer = AdornerLayer.GetAdornerLayer(this);
-            }
+            if (adornerLayer == null)
+                adornerLayer = AdornerLayer.GetAdornerLayer(this);
 
-            if (this.adornerLayer != null)
+            if (adornerLayer != null)
             {
                 FrameworkElement adornedControl = this; // The control to be adorned defaults to 'this'.
 
-                if (!string.IsNullOrEmpty(this.AdornedTemplatePartName))
+                if (!string.IsNullOrEmpty(AdornedTemplatePartName))
                 {
                     //
                     // If 'AdornedTemplatePartName' is set to a valid string then search the visual-tree
                     // for a UI element that has the specified part name.  If we find it then use it as the
                     // adorned control, otherwise throw an exception.
                     //
-                    adornedControl = FindNamedChild(this, this.AdornedTemplatePartName);
+                    adornedControl = FindNamedChild(this, AdornedTemplatePartName);
                     if (adornedControl == null)
-                    {
-                        throw new ApplicationException("Failed to find a FrameworkElement in the visual-tree with the part name '" + this.AdornedTemplatePartName + "'.");
-                    }
+                        throw new ApplicationException("Failed to find a FrameworkElement in the visual-tree with the part name '" + AdornedTemplatePartName + "'.");
                 }
 
-                this.adorner = new FrameworkElementAdorner(this.AdornerContent, adornedControl, 
-                                                           this.HorizontalAdornerPlacement, this.VerticalAdornerPlacement,
-                                                           this.AdornerOffsetX, this.AdornerOffsetY);
-                this.adornerLayer.Add(this.adorner);
+                adorner = new FrameworkElementAdorner(AdornerContent, adornedControl, 
+                                                      HorizontalAdornerPlacement, VerticalAdornerPlacement,
+                                                      AdornerOffsetX, AdornerOffsetY);
+                adornerLayer.Add(adorner);
 
 					//
 					// Update the layout of the adorner layout so that clients that depend
 					// on the 'AdornerShown' event can use the visual tree of the adorner.
 					//
-					this.adornerLayer.UpdateLayout();
+					adornerLayer.UpdateLayout();
 
                 UpdateAdornerDataContext();
             }
@@ -771,20 +746,20 @@ public class AdornedControl : ContentControl
         //
         closeAdornerTimer.Stop();
 
-        if (this.adornerLayer != null && this.adorner != null)
+        if (adornerLayer != null && adorner != null)
         {
-            this.adornerLayer.Remove(this.adorner);
-            this.adorner.DisconnectChild();
+            adornerLayer.Remove(adorner);
+            adorner.DisconnectChild();
         }
 
-        this.adorner = null;
-        this.adornerLayer = null;
+        adorner = null;
+        adornerLayer = null;
 
         //
         // Ensure that the state of the adorned control reflects that
         // the the adorner is no longer.
         //
-        this.IsAdornerVisible = false;
-        this.adornerShowState = AdornerShowState.Hidden;
-		}
+        IsAdornerVisible = false;
+        adornerShowState = AdornerShowState.Hidden;
+	}
 }

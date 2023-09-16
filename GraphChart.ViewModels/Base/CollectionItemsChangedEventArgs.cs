@@ -1,22 +1,19 @@
 ﻿using System.Collections;
 
-namespace BauMvvm.Views.Wpf;
+namespace Bau.Libraries.GraphChart.ViewModels.Base;
 
 /// <summary>
 ///     Argumentos para los eventos ItemsAdded e ItemsRemoved
 /// </summary>
 public class CollectionItemsChangedEventArgs : EventArgs
 {
-    // Variables privadas
-    private ICollection? _items = null;
-
     public CollectionItemsChangedEventArgs(ICollection items)
     {
-        _items = items;
+        Items = items;
     }
 
     /// <summary>
     ///     La colección de elementos modificados
     /// </summary>
-    public ICollection? Items => _items;
+    public ICollection Items { get; }
 }

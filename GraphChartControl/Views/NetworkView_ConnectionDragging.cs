@@ -42,7 +42,7 @@ public partial class NetworkView
     /// <summary>
     /// Event raised when the user starts to drag a connector.
     /// </summary>
-    private void ConnectorItem_DragStarted(object source, ConnectorItemDragStartedEventArgs e)
+    private void ConnectorItem_DragStarted(object source, EventArguments.ConnectorItemDragStartedEventArgs e)
     {
         this.Focus();
 
@@ -62,7 +62,7 @@ public partial class NetworkView
         // Raise an event so that application code can create a connection and
         // add it to the view-model.
         //
-        ConnectionDragStartedEventArgs eventArgs = new ConnectionDragStartedEventArgs(ConnectionDragStartedEvent, this, this.draggedOutNodeDataContext, this.draggedOutConnectorDataContext);
+        EventArguments.ConnectionDragStartedEventArgs eventArgs = new EventArguments.ConnectionDragStartedEventArgs(ConnectionDragStartedEvent, this, this.draggedOutNodeDataContext, this.draggedOutConnectorDataContext);
         RaiseEvent(eventArgs);
 
         //
@@ -83,7 +83,7 @@ public partial class NetworkView
     /// <summary>
     /// Event raised while the user is dragging a connector.
     /// </summary>
-    private void ConnectorItem_Dragging(object source, ConnectorItemDraggingEventArgs e)
+    private void ConnectorItem_Dragging(object source, EventArguments.ConnectorItemDraggingEventArgs e)
     {
         e.Handled = true;
 
@@ -94,7 +94,7 @@ public partial class NetworkView
         // Raise an event so that application code can compute intermediate connection points.
         //
         var connectionDraggingEventArgs =
-            new ConnectionDraggingEventArgs(ConnectionDraggingEvent, this, 
+            new EventArguments.ConnectionDraggingEventArgs(ConnectionDraggingEvent, this, 
                     this.draggedOutNodeDataContext, this.draggingConnectionDataContext, 
                     this.draggedOutConnectorDataContext);
 
@@ -114,7 +114,7 @@ public partial class NetworkView
             // that was dragged over is valid or not.
             //
             var queryFeedbackEventArgs = 
-                new QueryConnectionFeedbackEventArgs(QueryConnectionFeedbackEvent, this, this.draggedOutNodeDataContext, this.draggingConnectionDataContext, 
+                new EventArguments.QueryConnectionFeedbackEventArgs(QueryConnectionFeedbackEvent, this, this.draggedOutNodeDataContext, this.draggingConnectionDataContext, 
                         this.draggedOutConnectorDataContext, connectorDataContextDraggedOver);
 
             RaiseEvent(queryFeedbackEventArgs);
@@ -149,7 +149,7 @@ public partial class NetworkView
     /// <summary>
     /// Event raised when the user has finished dragging a connector.
     /// </summary>
-    private void ConnectorItem_DragCompleted(object source, ConnectorItemDragCompletedEventArgs e)
+    private void ConnectorItem_DragCompleted(object source, EventArguments.ConnectorItemDragCompletedEventArgs e)
     {
         e.Handled = true;
 
@@ -174,7 +174,7 @@ public partial class NetworkView
         // The application code can determine if the connection between the two connectors
         // is valid and if so it is free to make the appropriate connection in the view-model.
         //
-        RaiseEvent(new ConnectionDragCompletedEventArgs(ConnectionDragCompletedEvent, this, this.draggedOutNodeDataContext, this.draggingConnectionDataContext, this.draggedOutConnectorDataContext, connectorDataContextDraggedOver));
+        RaiseEvent(new EventArguments.ConnectionDragCompletedEventArgs(ConnectionDragCompletedEvent, this, this.draggedOutNodeDataContext, this.draggingConnectionDataContext, this.draggedOutConnectorDataContext, connectorDataContextDraggedOver));
 
         this.IsDragging = false;
         this.IsNotDragging = true;

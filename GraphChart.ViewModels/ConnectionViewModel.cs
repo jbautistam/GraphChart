@@ -1,218 +1,178 @@
 ﻿using System.Windows.Media;
 using System.Windows;
 
-using BauMvvm.Views.Wpf;
+using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Libraries.GraphChart.ViewModels;
 
 /// <summary>
 /// Defines a connection between two connectors (aka connection points) of two nodes.
 /// </summary>
-public sealed class ConnectionViewModel : AbstractModelBase
+public sealed class ConnectionViewModel : BaseObservableObject
 {
-    /// <summary>
-    /// The source connector the connection is attached to.
-    /// </summary>
-    private ConnectorViewModel sourceConnector = null;
+    // Eventos públicos
+    public event EventHandler<EventArgs>? ConnectionChanged;
+    // Variables privadas
+    private ConnectorViewModel? _sourceConnector = null;
+    private ConnectorViewModel? _targetConnector = null;
+    private Point _sourceConnectorHotspot;
+    private Point _targetConnectorHotspot;
+    private PointCollection _points = new();
 
     /// <summary>
-    /// The destination connector the connection is attached to.
-    /// </summary>
-    private ConnectorViewModel destConnector = null;
-
-    /// <summary>
-    /// The source and dest hotspots used for generating connection points.
-    /// </summary>
-    private Point sourceConnectorHotspot;
-    private Point destConnectorHotspot;
-
-    /// <summary>
-    /// Points that make up the connection.
-    /// </summary>
-    private PointCollection points = null;
-
-    /// <summary>
-    /// The source connector the connection is attached to.
-    /// </summary>
-    public ConnectorViewModel SourceConnector
-    {
-        get
-        {
-            return sourceConnector;
-        }
-        set
-        {
-            if (sourceConnector == value)
-            {
-                return;
-            }
-
-            if (sourceConnector != null)
-            {
-                sourceConnector.AttachedConnections.Remove(this);
-                sourceConnector.HotspotUpdated -= new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
-            }
-
-            sourceConnector = value;
-
-            if (sourceConnector != null)
-            {
-                sourceConnector.AttachedConnections.Add(this);
-                sourceConnector.HotspotUpdated += new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
-                this.SourceConnectorHotspot = sourceConnector.Hotspot;
-            }
-
-            OnPropertyChanged("SourceConnector");
-            OnConnectionChanged();
-        }
-    }
-
-    /// <summary>
-    /// The destination connector the connection is attached to.
-    /// </summary>
-    public ConnectorViewModel DestConnector
-    {
-        get
-        {
-            return destConnector;
-        }
-        set
-        {
-            if (destConnector == value)
-            {
-                return;
-            }
-
-            if (destConnector != null)
-            {
-                destConnector.AttachedConnections.Remove(this);
-                destConnector.HotspotUpdated -= new EventHandler<EventArgs>(destConnector_HotspotUpdated);
-            }
-
-            destConnector = value;
-
-            if (destConnector != null)
-            {
-                destConnector.AttachedConnections.Add(this);
-                destConnector.HotspotUpdated += new EventHandler<EventArgs>(destConnector_HotspotUpdated);
-                this.DestConnectorHotspot = destConnector.Hotspot;
-            }
-
-            OnPropertyChanged("DestConnector");
-            OnConnectionChanged();
-        }
-    }
-
-    /// <summary>
-    /// The source and dest hotspots used for generating connection points.
-    /// </summary>
-    public Point SourceConnectorHotspot
-    {
-        get
-        {
-            return sourceConnectorHotspot;
-        }
-        set
-        {
-            sourceConnectorHotspot = value;
-
-            ComputeConnectionPoints();
-
-            OnPropertyChanged("SourceConnectorHotspot");
-        }
-    }
-
-    public Point DestConnectorHotspot
-    {
-        get
-        {
-            return destConnectorHotspot;
-        }
-        set
-        {
-            destConnectorHotspot = value;
-
-            ComputeConnectionPoints();
-
-            OnPropertyChanged("DestConnectorHotspot");
-        }
-    }
-
-    /// <summary>
-    /// Points that make up the connection.
-    /// </summary>
-    public PointCollection Points
-    {
-        get
-        {
-            return points;
-        }
-        set
-        {
-            points = value;
-
-            OnPropertyChanged("Points");
-        }
-    }
-
-    /// <summary>
-    /// Event fired when the connection has changed.
-    /// </summary>
-    public event EventHandler<EventArgs> ConnectionChanged;
-
-    /// <summary>
-    /// Raises the 'ConnectionChanged' event.
+    ///     Lanza el evento <see cref="ConnectionChanged"/>
     /// </summary>
     private void OnConnectionChanged()
     {
-        if (ConnectionChanged != null)
-        {
-            ConnectionChanged(this, EventArgs.Empty);
-        }
-    }
+		ConnectionChanged?.Invoke(this, EventArgs.Empty);
+	}
 
     /// <summary>
-    /// Event raised when the hotspot of the source connector has been updated.
+    ///     Evento lanzado cuando se modifica el punto de origen del conector
     /// </summary>
-    private void sourceConnector_HotspotUpdated(object sender, EventArgs e)
+    private void sourceConnector_HotspotUpdated(object? sender, EventArgs e)
     {
-        this.SourceConnectorHotspot = this.SourceConnector.Hotspot;
+        SourceConnectorHotspot = SourceConnector?.Hotspot ?? new Point();
     }
 
     /// <summary>
-    /// Event raised when the hotspot of the dest connector has been updated.
+    ///     Evento lanzado cuando se modifica el punto de destino del conector
     /// </summary>
-    private void destConnector_HotspotUpdated(object sender, EventArgs e)
+    private void destConnector_HotspotUpdated(object? sender, EventArgs e)
     {
-        this.DestConnectorHotspot = this.DestConnector.Hotspot;
+        DestConnectorHotspot = DestConnector?.Hotspot ?? new Point();
     }
 
     /// <summary>
-    /// Rebuild connection points.
+    ///     Recalcula los puntos de conexión
     /// </summary>
     private void ComputeConnectionPoints()
     {
-        PointCollection computedPoints = new PointCollection();
-        computedPoints.Add(this.SourceConnectorHotspot);
+        PointCollection computedPoints = new()
+                                            {
+                                                SourceConnectorHotspot
+                                            };
+        double deltaX = Math.Abs(DestConnectorHotspot.X - SourceConnectorHotspot.X);
+        double deltaY = Math.Abs(DestConnectorHotspot.Y - SourceConnectorHotspot.Y);
 
-        double deltaX = Math.Abs(this.DestConnectorHotspot.X - this.SourceConnectorHotspot.X);
-        double deltaY = Math.Abs(this.DestConnectorHotspot.Y - this.SourceConnectorHotspot.Y);
-        if (deltaX > deltaY)
+            // Añade los puntos medios calculados
+            if (deltaX > deltaY)
+            {
+                double midPointX = SourceConnectorHotspot.X + ((DestConnectorHotspot.X - SourceConnectorHotspot.X) / 2);
+
+                    computedPoints.Add(new Point(midPointX, SourceConnectorHotspot.Y));
+                    computedPoints.Add(new Point(midPointX, DestConnectorHotspot.Y));
+            }
+            else
+            {
+                double midPointY = SourceConnectorHotspot.Y + ((DestConnectorHotspot.Y - SourceConnectorHotspot.Y) / 2);
+
+                    computedPoints.Add(new Point(SourceConnectorHotspot.X, midPointY));
+                    computedPoints.Add(new Point(DestConnectorHotspot.X, midPointY));
+            }
+            // Añade los puntos de destino
+            computedPoints.Add(DestConnectorHotspot);
+            computedPoints.Freeze();
+            // Devuelve los puntos calculados
+            Points = computedPoints;
+    }
+
+    /// <summary>
+    ///     Conector origen al que se adjunta la conexión
+    /// </summary>
+    public ConnectorViewModel? SourceConnector
+    {
+        get { return _sourceConnector; }
+        set
         {
-            double midPointX = this.SourceConnectorHotspot.X + ((this.DestConnectorHotspot.X - this.SourceConnectorHotspot.X) / 2);
-            computedPoints.Add(new Point(midPointX, this.SourceConnectorHotspot.Y));
-            computedPoints.Add(new Point(midPointX, this.DestConnectorHotspot.Y));
+            if (_sourceConnector != value)
+            {
+                // Elimina los puntos de origen y los eventos
+                if (_sourceConnector is not null)
+                {
+                    _sourceConnector.AttachedConnections.Remove(this);
+                    _sourceConnector.HotspotUpdated -= new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
+                }
+                // Asigna el punto de origen
+                _sourceConnector = value;
+                // Añade los puntos de origen y los eventos
+                if (_sourceConnector is not null)
+                {
+                    _sourceConnector.AttachedConnections.Add(this);
+                    _sourceConnector.HotspotUpdated += new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
+                    SourceConnectorHotspot = _sourceConnector.Hotspot;
+                }
+                // Lanza los eventos de modificación
+                OnPropertyChanged(nameof(SourceConnector));
+                OnConnectionChanged();
+            }
         }
-        else
+    }
+
+    /// <summary>
+    ///     Conector origen al que se adjunta la conexión
+    /// </summary>
+    public ConnectorViewModel? DestConnector
+    {
+        get { return _targetConnector; }
+        set
         {
-            double midPointY = this.SourceConnectorHotspot.Y + ((this.DestConnectorHotspot.Y - this.SourceConnectorHotspot.Y) / 2);
-            computedPoints.Add(new Point(this.SourceConnectorHotspot.X, midPointY));
-            computedPoints.Add(new Point(this.DestConnectorHotspot.X, midPointY));
+            if (_targetConnector != value)
+            {
+                // Elimina los puntos de destino y los eventos
+                if (_targetConnector is not null)
+                {
+                    _targetConnector.AttachedConnections.Remove(this);
+                    _targetConnector.HotspotUpdated -= new EventHandler<EventArgs>(destConnector_HotspotUpdated);
+                }
+                // Asigna el punto de destino
+                _targetConnector = value;
+                // Añade los puntos de destino y los eventos
+                if (_targetConnector is not null)
+                {
+                    _targetConnector.AttachedConnections.Add(this);
+                    _targetConnector.HotspotUpdated += new EventHandler<EventArgs>(destConnector_HotspotUpdated);
+                    DestConnectorHotspot = _targetConnector.Hotspot;
+                }
+                // Lanza los eventos de modificación
+                OnPropertyChanged(nameof(DestConnector));
+                OnConnectionChanged();
+            }
         }
+    }
 
-        computedPoints.Add(this.DestConnectorHotspot);
-        computedPoints.Freeze();
+    /// <summary>
+    ///     Punto origen utilizado para los puntos de la conexión
+    /// </summary>
+    public Point SourceConnectorHotspot
+    {
+        get { return _sourceConnectorHotspot; }
+        set
+        {
+            if (CheckObject(ref _sourceConnectorHotspot, value))
+                ComputeConnectionPoints();
+        }
+    }
 
-        this.Points = computedPoints;
+    /// <summary>
+    ///     Punto destino utilizado para los puntos de la conexión
+    /// </summary>
+    public Point DestConnectorHotspot
+    {
+        get { return _targetConnectorHotspot; }
+        set
+        {
+            if (CheckObject(ref _targetConnectorHotspot, value))
+                ComputeConnectionPoints();
+        }
+    }
+
+    /// <summary>
+    ///     Puntos que componen la conexión
+    /// </summary>
+    public PointCollection Points
+    {
+        get { return _points; }
+        set { CheckObject(ref _points, value); }
     }
 }
