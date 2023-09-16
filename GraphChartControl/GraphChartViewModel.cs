@@ -21,6 +21,7 @@ public class GraphChartViewModel : BaseObservableObject
 	{
 		Network = new NetworkViewModel();
 		PopulateWithTestData();
+		CreateNodeCommand = new BaseCommand(_ => CreateNode());
 	}
 
 	/// <summary>
@@ -195,6 +196,14 @@ public class GraphChartViewModel : BaseObservableObject
 				return connection;
 
 		return null;
+	}
+
+	/// <summary>
+	///		Crea un nodo
+	/// </summary>
+	private void CreateNode()
+	{
+		System.Diagnostics.Debug.WriteLine("Create node");
 	}
 
 	/// <summary>
@@ -386,4 +395,9 @@ public class GraphChartViewModel : BaseObservableObject
 		get { return _contentViewportHeight; }
 		set { CheckProperty(ref _contentViewportHeight, value); }
 	}
+
+	/// <summary>
+	///		Comando de creación de un nodo
+	/// </summary>
+	public BaseCommand CreateNodeCommand { get; }
 }

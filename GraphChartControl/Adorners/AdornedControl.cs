@@ -321,7 +321,7 @@ public class AdornedControl : ContentControl
     {
         get
         {
-            return (double)GetValue(CloseAdornerTimeOutProperty);
+            return (double) GetValue(CloseAdornerTimeOutProperty);
         }
         set
         {
@@ -342,7 +342,7 @@ public class AdornedControl : ContentControl
     {
         get
         {
-            return (string)GetValue(AdornedTemplatePartNameProperty);
+            return (string) GetValue(AdornedTemplatePartNameProperty);
         }
         set
         {

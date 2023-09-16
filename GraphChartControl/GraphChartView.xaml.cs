@@ -8,13 +8,14 @@ using Bau.Libraries.GraphChart.ViewModels;
 namespace Bau.Controls.GraphChartControl;
 
 /// <summary>
-/// Lógica de interacción para GraphChartView.xaml
+///     Control de usuario para mostrar un gráfico de un flujo de trabajo
 /// </summary>
 public partial class GraphChartView : UserControl
 {
 	public GraphChartView()
 	{
 		InitializeComponent();
+        DataContext = ViewModel = new GraphChartViewModel();
 	}
 
     /// <summary>
@@ -42,7 +43,7 @@ public partial class GraphChartView : UserControl
         //
         // Delegate the real work to the view model.
         //
-        var connection = ViewModel?.ConnectionDragStarted(draggedOutConnector, curDragPoint);
+        var connection = ViewModel.ConnectionDragStarted(draggedOutConnector, curDragPoint);
 
         //
         // Must return the view-model object that represents the connection via the event args.
@@ -61,7 +62,7 @@ public partial class GraphChartView : UserControl
         object feedbackIndicator = null;
         bool connectionOk = true;
 
-        ViewModel?.QueryConnnectionFeedback(draggedOutConnector, draggedOverConnector, out feedbackIndicator, out connectionOk);
+        ViewModel.QueryConnnectionFeedback(draggedOutConnector, draggedOverConnector, out feedbackIndicator, out connectionOk);
 
         //
         // Return the feedback object to NetworkView.
@@ -83,7 +84,7 @@ public partial class GraphChartView : UserControl
     {
         Point curDragPoint = Mouse.GetPosition(networkControl);
         var connection = (ConnectionViewModel)e.Connection;
-        ViewModel?.ConnectionDragging(curDragPoint, connection);
+        ViewModel.ConnectionDragging(curDragPoint, connection);
     }
 
     /// <summary>
@@ -94,17 +95,7 @@ public partial class GraphChartView : UserControl
         var connectorDraggedOut = (ConnectorViewModel)e.ConnectorDraggedOut;
         var connectorDraggedOver = (ConnectorViewModel)e.ConnectorDraggedOver;
         var newConnection = (ConnectionViewModel)e.Connection;
-        ViewModel?.ConnectionDragCompleted(newConnection, connectorDraggedOut, connectorDraggedOver);
-    }
-
-/*
-
-    /// <summary>
-    /// Event raised to delete the selected node.
-    /// </summary>
-    private void DeleteSelectedNodes_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        this.ViewModel.DeleteSelectedNodes();
+        ViewModel.ConnectionDragCompleted(newConnection, connectorDraggedOut, connectorDraggedOver);
     }
 
     /// <summary>
@@ -116,12 +107,29 @@ public partial class GraphChartView : UserControl
     }
 
     /// <summary>
+    /// Creates a new node in the network at the current mouse location.
+    /// </summary>
+    public void CreateNode()
+    {
+        var newNodePosition = Mouse.GetPosition(networkControl);
+        ViewModel.CreateNode("New Node!", newNodePosition, true);
+    }
+
+    /// <summary>
+    /// Event raised to delete the selected node.
+    /// </summary>
+    private void DeleteSelectedNodes_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        ViewModel.DeleteSelectedNodes();
+    }
+
+    /// <summary>
     /// Event raised to delete a node.
     /// </summary>
     private void DeleteNode_Executed(object sender, ExecutedRoutedEventArgs e)
     {
         var node = (NodeViewModel)e.Parameter;
-        this.ViewModel.DeleteNode(node);
+        ViewModel.DeleteNode(node);
     }
 
     /// <summary>
@@ -130,30 +138,11 @@ public partial class GraphChartView : UserControl
     private void DeleteConnection_Executed(object sender, ExecutedRoutedEventArgs e)
     {
         var connection = (ConnectionViewModel)e.Parameter;
-        this.ViewModel.DeleteConnection(connection);
+        ViewModel.DeleteConnection(connection);
     }
-
-    /// <summary>
-    /// Creates a new node in the network at the current mouse location.
-    /// </summary>
-    private void CreateNode()
-    {
-        var newNodePosition = Mouse.GetPosition(networkControl);
-        this.ViewModel.CreateNode("New Node!", newNodePosition, true);
-    }
-*/
 
     /// <summary>
     ///     Acceso para el ViewModel del control
     /// </summary>
-    public GraphChartViewModel? ViewModel
-    {
-        get
-        {
-            if (DataContext is GraphChartViewModel context)
-                return context;
-            else
-                return null;
-        }
-    }
+    public GraphChartViewModel ViewModel { get; }
 }

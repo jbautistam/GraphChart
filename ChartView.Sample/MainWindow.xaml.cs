@@ -13,9 +13,20 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Event raised when the Window has loaded.
+    ///     Crea un nodo
     /// </summary>
+    private void CreateNode()
+    {
+        grpControl.CreateNode();
+    }
+
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
     }
+
+
+	private void CreateNode_Click(object sender, RoutedEventArgs e)
+	{
+        CreateNode();
+	}
 }

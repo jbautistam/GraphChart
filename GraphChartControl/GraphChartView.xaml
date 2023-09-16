@@ -16,7 +16,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Themes/SharedVisualTemplates.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<!-- UI commands. -->
+			<!-- Comandos del interface de usuario -->
 			<RoutedUICommand x:Key="Commands.DeleteSelectedNodes" />
 			<RoutedUICommand x:Key="Commands.CreateNode" />
 			<RoutedUICommand x:Key="Commands.DeleteNode" />
@@ -196,6 +196,20 @@
 			</DataTemplate>
 		</ResourceDictionary>
 	</UserControl.Resources>
+
+	<!-- Vincula las teclas a los comandos-->
+	<UserControl.InputBindings>
+		<KeyBinding Key="Insert" Command="{StaticResource Commands.CreateNode}" />
+		<KeyBinding Key="Del" Command="{StaticResource Commands.DeleteSelectedNodes}" />
+	</UserControl.InputBindings>
+	<!-- Vincula los comandos a los manejadores de eventos-->
+	<UserControl.CommandBindings>
+		<CommandBinding Command="{StaticResource Commands.DeleteSelectedNodes}" Executed="DeleteSelectedNodes_Executed" />
+		<CommandBinding Command="{StaticResource Commands.CreateNode}" Executed="CreateNode_Executed" />
+		<CommandBinding Command="{StaticResource Commands.DeleteNode}" Executed="DeleteNode_Executed" />
+		<CommandBinding Command="{StaticResource Commands.DeleteConnection}" Executed="DeleteConnection_Executed" />
+	</UserControl.CommandBindings>
+
 	<UserControl.DataContext>
 		<local:GraphChartViewModel />
 	</UserControl.DataContext>
