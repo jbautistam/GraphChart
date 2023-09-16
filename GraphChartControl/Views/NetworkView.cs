@@ -102,16 +102,16 @@ public partial class NetworkView : Control
         EventManager.RegisterRoutedEvent("NodeDragCompleted", RoutingStrategy.Bubble, typeof(NodeDragCompletedEventHandler), typeof(NetworkView));
 
     public static readonly RoutedEvent ConnectionDragStartedEvent =
-        EventManager.RegisterRoutedEvent("ConnectionDragStarted", RoutingStrategy.Bubble, typeof(ConnectionDragStartedEventHandler), typeof(NetworkView));
+        EventManager.RegisterRoutedEvent("ConnectionDragStarted", RoutingStrategy.Bubble, typeof(GraphChartView.ConnectionDragStartedEventHandler), typeof(NetworkView));
 
     public static readonly RoutedEvent QueryConnectionFeedbackEvent =
-        EventManager.RegisterRoutedEvent("QueryConnectionFeedback", RoutingStrategy.Bubble, typeof(QueryConnectionFeedbackEventHandler), typeof(NetworkView));
+        EventManager.RegisterRoutedEvent("QueryConnectionFeedback", RoutingStrategy.Bubble, typeof(GraphChartView.QueryConnectionFeedbackEventHandler), typeof(NetworkView));
 
     public static readonly RoutedEvent ConnectionDraggingEvent =
-        EventManager.RegisterRoutedEvent("ConnectionDragging", RoutingStrategy.Bubble, typeof(ConnectionDraggingEventHandler), typeof(NetworkView));
+        EventManager.RegisterRoutedEvent(nameof(ConnectionDragging), RoutingStrategy.Bubble, typeof(GraphChartView.ConnectionDraggingEventHandler), typeof(NetworkView));
 
     public static readonly RoutedEvent ConnectionDragCompletedEvent =
-        EventManager.RegisterRoutedEvent("ConnectionDragCompleted", RoutingStrategy.Bubble, typeof(ConnectionDragCompletedEventHandler), typeof(NetworkView));
+        EventManager.RegisterRoutedEvent("ConnectionDragCompleted", RoutingStrategy.Bubble, typeof(GraphChartView.ConnectionDragCompletedEventHandler), typeof(NetworkView));
 
     public static readonly RoutedCommand SelectAllCommand = null;
     public static readonly RoutedCommand SelectNoneCommand = null;
@@ -191,7 +191,7 @@ public partial class NetworkView : Control
     /// <summary>
     /// Event raised when the user starts dragging a connector in the network.
     /// </summary>
-    public event ConnectionDragStartedEventHandler ConnectionDragStarted
+    public event GraphChartView.ConnectionDragStartedEventHandler ConnectionDragStarted
     {
         add { AddHandler(ConnectionDragStartedEvent, value); }
         remove { RemoveHandler(ConnectionDragStartedEvent, value); }
@@ -202,7 +202,7 @@ public partial class NetworkView : Control
     /// The event handlers should supply a feedback objects and data-template that displays the 
     /// object as an appropriate graphic.
     /// </summary>
-    public event QueryConnectionFeedbackEventHandler QueryConnectionFeedback
+    public event GraphChartView.QueryConnectionFeedbackEventHandler QueryConnectionFeedback
     {
         add { AddHandler(QueryConnectionFeedbackEvent, value); }
         remove { RemoveHandler(QueryConnectionFeedbackEvent, value); }
@@ -211,7 +211,7 @@ public partial class NetworkView : Control
     /// <summary>
     /// Event raised when a connection is being dragged.
     /// </summary>
-    public event ConnectionDraggingEventHandler ConnectionDragging
+    public event GraphChartView.ConnectionDraggingEventHandler ConnectionDragging
     {
         add { AddHandler(ConnectionDraggingEvent, value); }
         remove { RemoveHandler(ConnectionDraggingEvent, value); }
@@ -220,7 +220,7 @@ public partial class NetworkView : Control
     /// <summary>
     /// Event raised when the user has completed dragging a connection in the network.
     /// </summary>
-    public event ConnectionDragCompletedEventHandler ConnectionDragCompleted
+    public event GraphChartView.ConnectionDragCompletedEventHandler ConnectionDragCompleted
     {
         add { AddHandler(ConnectionDragCompletedEvent, value); }
         remove { RemoveHandler(ConnectionDragCompletedEvent, value); }
@@ -231,14 +231,8 @@ public partial class NetworkView : Control
     /// </summary>
     public ImpObservableCollection<object> Nodes
     {
-        get
-        {
-            return (ImpObservableCollection<object>)GetValue(NodesProperty);
-        }
-        private set
-        {
-            SetValue(NodesPropertyKey, value);
-        }
+        get { return (ImpObservableCollection<object>) GetValue(NodesProperty); }
+        private set { SetValue(NodesPropertyKey, value); }
     }
 
     /// <summary>
@@ -246,14 +240,8 @@ public partial class NetworkView : Control
     /// </summary>
     public ImpObservableCollection<object> Connections
     {
-        get
-        {
-            return (ImpObservableCollection<object>)GetValue(ConnectionsProperty);
-        }
-        private set
-        {
-            SetValue(ConnectionsPropertyKey, value);
-        }
+        get { return (ImpObservableCollection<object>) GetValue(ConnectionsProperty); }
+        private set { SetValue(ConnectionsPropertyKey, value); }
     }
 
     /// <summary>
@@ -262,14 +250,8 @@ public partial class NetworkView : Control
     /// </summary>
     public IEnumerable NodesSource
     {
-        get
-        {
-            return (IEnumerable)GetValue(NodesSourceProperty);
-        }
-        set
-        {
-            SetValue(NodesSourceProperty, value);
-        }
+        get { return (IEnumerable) GetValue(NodesSourceProperty); }
+        set { SetValue(NodesSourceProperty, value); }
     }
 
     /// <summary>
@@ -278,14 +260,8 @@ public partial class NetworkView : Control
     /// </summary>
     public IEnumerable ConnectionsSource
     {
-        get
-        {
-            return (IEnumerable)GetValue(ConnectionsSourceProperty);
-        }
-        set
-        {
-            SetValue(ConnectionsSourceProperty, value);
-        }
+        get { return (IEnumerable) GetValue(ConnectionsSourceProperty); }
+        set { SetValue(ConnectionsSourceProperty, value); }
     }
 
     /// <summary>
@@ -294,14 +270,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsClearSelectionOnEmptySpaceClickEnabled
     {
-        get
-        {
-            return (bool) GetValue(IsClearSelectionOnEmptySpaceClickEnabledProperty);
-        }
-        set
-        {
-            SetValue(IsClearSelectionOnEmptySpaceClickEnabledProperty, value);
-        }
+        get { return (bool) GetValue(IsClearSelectionOnEmptySpaceClickEnabledProperty); }
+        set { SetValue(IsClearSelectionOnEmptySpaceClickEnabledProperty, value); }
     }
 
     /// <summary>
@@ -309,14 +279,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool EnableConnectionDragging
     {
-        get
-        {
-            return (bool)GetValue(EnableConnectionDraggingProperty);
-        }
-        set
-        {
-            SetValue(EnableConnectionDraggingProperty, value);
-        }
+        get { return (bool) GetValue(EnableConnectionDraggingProperty); }
+        set { SetValue(EnableConnectionDraggingProperty, value); }
     }
 
     /// <summary>
@@ -325,14 +289,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsDraggingConnection
     {
-        get
-        {
-            return (bool)GetValue(IsDraggingConnectionProperty);
-        }
-        private set
-        {
-            SetValue(IsDraggingConnectionPropertyKey, value);
-        }
+        get { return (bool) GetValue(IsDraggingConnectionProperty); }
+        private set { SetValue(IsDraggingConnectionPropertyKey, value); }
     }
 
     /// <summary>
@@ -341,14 +299,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsNotDraggingConnection
     {
-        get
-        {
-            return (bool)GetValue(IsNotDraggingConnectionProperty);
-        }
-        private set
-        {
-            SetValue(IsNotDraggingConnectionPropertyKey, value);
-        }
+        get { return (bool) GetValue(IsNotDraggingConnectionProperty); }
+        private set { SetValue(IsNotDraggingConnectionPropertyKey, value); }
     }
 
     /// <summary>
@@ -356,14 +308,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool EnableNodeDragging
     {
-        get
-        {
-            return (bool)GetValue(EnableNodeDraggingProperty);
-        }
-        set
-        {
-            SetValue(EnableNodeDraggingProperty, value);
-        }
+        get { return (bool) GetValue(EnableNodeDraggingProperty); }
+        set { SetValue(EnableNodeDraggingProperty, value); }
     }
 
     /// <summary>
@@ -372,14 +318,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsDraggingNode
     {
-        get
-        {
-            return (bool)GetValue(IsDraggingNodeProperty);
-        }
-        private set
-        {
-            SetValue(IsDraggingNodePropertyKey, value);
-        }
+        get { return (bool) GetValue(IsDraggingNodeProperty); }
+        private set { SetValue(IsDraggingNodePropertyKey, value); }
     }
 
     /// <summary>
@@ -388,14 +328,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsNotDraggingNode
     {
-        get
-        {
-            return (bool)GetValue(IsNotDraggingNodeProperty);
-        }
-        private set
-        {
-            SetValue(IsNotDraggingNodePropertyKey, value);
-        }
+        get { return (bool) GetValue(IsNotDraggingNodeProperty); }
+        private set { SetValue(IsNotDraggingNodePropertyKey, value); }
     }
 
     /// <summary>
@@ -403,14 +337,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsDragging
     {
-        get
-        {
-            return (bool)GetValue(IsDraggingProperty);
-        }
-        private set
-        {
-            SetValue(IsDraggingPropertyKey, value);
-        }
+        get { return (bool) GetValue(IsDraggingProperty); }
+        private set { SetValue(IsDraggingPropertyKey, value); }
     }
 
     /// <summary>
@@ -418,14 +346,8 @@ public partial class NetworkView : Control
     /// </summary>
     public bool IsNotDragging
     {
-        get
-        {
-            return (bool)GetValue(IsNotDraggingProperty);
-        }
-        private set
-        {
-            SetValue(IsNotDraggingPropertyKey, value);
-        }
+        get { return (bool) GetValue(IsNotDraggingProperty); }
+        private set { SetValue(IsNotDraggingPropertyKey, value); }
     }
 
     /// <summary>
@@ -434,14 +356,8 @@ public partial class NetworkView : Control
     /// </summary>
     public DataTemplate NodeItemTemplate
     {
-        get
-        {
-            return (DataTemplate)GetValue(NodeItemTemplateProperty);
-        }
-        set
-        {
-            SetValue(NodeItemTemplateProperty, value);
-        }
+        get { return (DataTemplate) GetValue(NodeItemTemplateProperty); }
+        set { SetValue(NodeItemTemplateProperty, value); }
     }
 
     /// <summary>
@@ -450,14 +366,8 @@ public partial class NetworkView : Control
     /// </summary>
     public DataTemplateSelector NodeItemTemplateSelector
     {
-        get
-        {
-            return (DataTemplateSelector)GetValue(NodeItemTemplateSelectorProperty);
-        }
-        set
-        {
-            SetValue(NodeItemTemplateSelectorProperty, value);
-        }
+        get { return (DataTemplateSelector) GetValue(NodeItemTemplateSelectorProperty); }
+        set { SetValue(NodeItemTemplateSelectorProperty, value); }
     }
 
     /// <summary>
@@ -466,14 +376,8 @@ public partial class NetworkView : Control
     /// </summary>
     public Style NodeItemContainerStyle
     {
-        get
-        {
-            return (Style)GetValue(NodeItemContainerStyleProperty);
-        }
-        set
-        {
-            SetValue(NodeItemContainerStyleProperty, value);
-        }
+        get { return (Style) GetValue(NodeItemContainerStyleProperty); }
+        set { SetValue(NodeItemContainerStyleProperty, value); }
     }
 
     /// <summary>
@@ -482,14 +386,8 @@ public partial class NetworkView : Control
     /// </summary>
     public DataTemplate ConnectionItemTemplate
     {
-        get
-        {
-            return (DataTemplate)GetValue(ConnectionItemTemplateProperty);
-        }
-        set
-        {
-            SetValue(ConnectionItemTemplateProperty, value);
-        }
+        get { return (DataTemplate) GetValue(ConnectionItemTemplateProperty); }
+        set { SetValue(ConnectionItemTemplateProperty, value); }
     }
 
     /// <summary>
@@ -498,14 +396,8 @@ public partial class NetworkView : Control
     /// </summary>
     public DataTemplateSelector ConnectionItemTemplateSelector
     {
-        get
-        {
-            return (DataTemplateSelector)GetValue(ConnectionItemTemplateSelectorProperty);
-        }
-        set
-        {
-            SetValue(ConnectionItemTemplateSelectorProperty, value);
-        }
+        get { return (DataTemplateSelector) GetValue(ConnectionItemTemplateSelectorProperty); }
+        set { SetValue(ConnectionItemTemplateSelectorProperty, value); }
     }
 
     /// <summary>
@@ -514,14 +406,8 @@ public partial class NetworkView : Control
     /// </summary>
     public Style ConnectionItemContainerStyle
     {
-        get
-        {
-            return (Style)GetValue(ConnectionItemContainerStyleProperty);
-        }
-        set
-        {
-            SetValue(ConnectionItemContainerStyleProperty, value);
-        }
+        get { return (Style)GetValue(ConnectionItemContainerStyleProperty); }
+        set { SetValue(ConnectionItemContainerStyleProperty, value); }
     }
 
     /// <summary>
@@ -532,20 +418,14 @@ public partial class NetworkView : Control
         get
         {
             if (nodeItemsControl != null)
-            {
                 return nodeItemsControl.SelectedItem;
-            }
             else
             {
                 if (initialSelectedNodes == null)
-                {
                     return null;
-                }
 
                 if (initialSelectedNodes.Count != 1)
-                {
                     return null;
-                }
 
                 return initialSelectedNodes[0];
             }
@@ -553,16 +433,11 @@ public partial class NetworkView : Control
         set
         {
             if (nodeItemsControl != null)
-            {
                 nodeItemsControl.SelectedItem = value;
-            }
             else
             {
                 if (initialSelectedNodes == null)
-                {
                     initialSelectedNodes = new List<object>();
-                }
-
                 initialSelectedNodes.Clear();
                 initialSelectedNodes.Add(value);
             }
@@ -577,15 +452,11 @@ public partial class NetworkView : Control
         get
         {
             if (nodeItemsControl != null)
-            {
                 return nodeItemsControl.SelectedItems;
-            }
             else
             {
                 if (initialSelectedNodes == null)
-                {
                     initialSelectedNodes = new List<object>();
-                }
 
                 return initialSelectedNodes;
             }
@@ -647,7 +518,7 @@ public partial class NetworkView : Control
     /// </summary>
     public void SelectNone()
     {
-        this.SelectedNodes.Clear();
+        SelectedNodes.Clear();
     }
 
     /// <summary>
@@ -655,13 +526,11 @@ public partial class NetworkView : Control
     /// </summary>
     public void SelectAll()
     {
-        if (this.SelectedNodes.Count != this.Nodes.Count)
+        if (SelectedNodes.Count != Nodes.Count)
         {
-            this.SelectedNodes.Clear();
-            foreach (var node in this.Nodes)
-            {
-                this.SelectedNodes.Add(node);
-            }
+            SelectedNodes.Clear();
+            foreach (var node in Nodes)
+                SelectedNodes.Add(node);
         }
     }
 
@@ -673,11 +542,11 @@ public partial class NetworkView : Control
         var selectedNodesCopy = new ArrayList(this.SelectedNodes);
         this.SelectedNodes.Clear();
 
-        foreach (var node in this.Nodes)
+        foreach (var node in Nodes)
         {
             if (!selectedNodesCopy.Contains(node))
             {
-                this.SelectedNodes.Add(node);
+                SelectedNodes.Add(node);
             }
         }
     }
@@ -687,7 +556,7 @@ public partial class NetworkView : Control
     /// </summary>
     public void CancelConnectionDragging()
     {
-        if (!this.IsDraggingConnection)
+        if (!IsDraggingConnection)
         {
             return;
         }
@@ -699,14 +568,14 @@ public partial class NetworkView : Control
 
         draggedOutConnectorItem.CancelConnectionDragging();
 
-        this.IsDragging = false;
-        this.IsNotDragging = true;
-        this.IsDraggingConnection = false;
-        this.IsNotDraggingConnection = true;
-        this.draggedOutConnectorItem = null;
-        this.draggedOutNodeDataContext = null;
-        this.draggedOutConnectorDataContext = null;
-        this.draggingConnectionDataContext = null;
+        IsDragging = false;
+        IsNotDragging = true;
+        IsDraggingConnection = false;
+        IsNotDraggingConnection = true;
+        draggedOutConnectorItem = null;
+        draggedOutNodeDataContext = null;
+        draggedOutConnectorDataContext = null;
+        draggingConnectionDataContext = null;
     }
 
     /// <summary>
@@ -756,8 +625,8 @@ public partial class NetworkView : Control
     /// </summary>
     private static void SelectAll_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        NetworkView c = (NetworkView)sender;
-        c.SelectAll();
+        if (sender is NetworkView view)
+            view.SelectAll();
     }
 
     /// <summary>
@@ -765,8 +634,8 @@ public partial class NetworkView : Control
     /// </summary>
     private static void SelectNone_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        NetworkView c = (NetworkView)sender;
-        c.SelectNone();
+        if (sender is NetworkView view)
+            view.SelectNone();
     }
 
     /// <summary>
@@ -774,8 +643,8 @@ public partial class NetworkView : Control
     /// </summary>
     private static void InvertSelection_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        NetworkView c = (NetworkView)sender;
-        c.InvertSelection();
+        if (sender is NetworkView view)
+            view.InvertSelection();
     }
 
     /// <summary>
@@ -783,8 +652,8 @@ public partial class NetworkView : Control
     /// </summary>
     private static void CancelConnectionDragging_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        NetworkView c = (NetworkView)sender;
-        c.CancelConnectionDragging();
+        if (sender is NetworkView view)
+            view.CancelConnectionDragging();
     }
 
     /// <summary>
@@ -792,46 +661,47 @@ public partial class NetworkView : Control
     /// </summary>
     private static void NodesSource_PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        NetworkView c = (NetworkView)d;
-
-        //
-        // Clear 'Nodes'.
-        //
-        c.Nodes.Clear();
-
-        if (e.OldValue != null)
+        if (d is NetworkView view)
         {
-            var notifyCollectionChanged = e.OldValue as INotifyCollectionChanged;
-            if (notifyCollectionChanged != null)
-            {
-                //
-                // Unhook events from previous collection.
-                //
-                notifyCollectionChanged.CollectionChanged -= new NotifyCollectionChangedEventHandler(c.NodesSource_CollectionChanged);
-            }
-        }
+            //
+            // Clear 'Nodes'.
+            //
+            view.Nodes.Clear();
 
-        if (e.NewValue != null)
-        {
-            var enumerable = e.NewValue as IEnumerable;
-            if (enumerable != null)
+            if (e.OldValue != null)
             {
-                //
-                // Populate 'Nodes' from 'NodesSource'.
-                //
-                foreach (object obj in enumerable)
+                var notifyCollectionChanged = e.OldValue as INotifyCollectionChanged;
+                if (notifyCollectionChanged != null)
                 {
-                    c.Nodes.Add(obj);
+                    //
+                    // Unhook events from previous collection.
+                    //
+                    notifyCollectionChanged.CollectionChanged -= new NotifyCollectionChangedEventHandler(view.NodesSource_CollectionChanged);
                 }
             }
 
-            var notifyCollectionChanged = e.NewValue as INotifyCollectionChanged;
-            if (notifyCollectionChanged != null)
+            if (e.NewValue != null)
             {
-                //
-                // Hook events in new collection.
-                //
-                notifyCollectionChanged.CollectionChanged += new NotifyCollectionChangedEventHandler(c.NodesSource_CollectionChanged);
+                var enumerable = e.NewValue as IEnumerable;
+                if (enumerable != null)
+                {
+                    //
+                    // Populate 'Nodes' from 'NodesSource'.
+                    //
+                    foreach (object obj in enumerable)
+                    {
+                        view.Nodes.Add(obj);
+                    }
+                }
+
+                var notifyCollectionChanged = e.NewValue as INotifyCollectionChanged;
+                if (notifyCollectionChanged != null)
+                {
+                    //
+                    // Hook events in new collection.
+                    //
+                    notifyCollectionChanged.CollectionChanged += new NotifyCollectionChangedEventHandler(view.NodesSource_CollectionChanged);
+                }
             }
         }
     }
@@ -1018,10 +888,8 @@ public partial class NetworkView : Control
     /// </summary>
     private void nodeItemsControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (this.SelectionChanged != null)
-        {
-            this.SelectionChanged(this, new SelectionChangedEventArgs(ListBox.SelectionChangedEvent, e.RemovedItems, e.AddedItems));
-        }
+        if (SelectionChanged is not null)
+            SelectionChanged(this, new SelectionChangedEventArgs(ListBox.SelectionChangedEvent, e.RemovedItems, e.AddedItems));
     }
 
     /// <summary>
@@ -1029,7 +897,7 @@ public partial class NetworkView : Control
     /// </summary>
     internal int FindMaxZIndex()
     {
-        if (this.nodeItemsControl == null)
+        if (nodeItemsControl == null)
         {
             return 0;
         }
@@ -1038,7 +906,7 @@ public partial class NetworkView : Control
 
         for (int nodeIndex = 0; ; ++nodeIndex)
         {
-            NodeItem nodeItem = (NodeItem)this.nodeItemsControl.ItemContainerGenerator.ContainerFromIndex(nodeIndex);
+            NodeItem nodeItem = (NodeItem) nodeItemsControl.ItemContainerGenerator.ContainerFromIndex(nodeIndex);
             if (nodeItem == null)
             {
                 break;
@@ -1060,13 +928,12 @@ public partial class NetworkView : Control
     /// Otherwise 'node' can actually be a 'NodeItem' in which case it is 
     /// simply returned.
     /// </summary>
-    internal NodeItem FindAssociatedNodeItem(object node)
+    internal NodeItem? FindAssociatedNodeItem(object node)
     {
-        NodeItem nodeItem = node as NodeItem;
-        if (nodeItem == null)
-        {
-            nodeItem = nodeItemsControl.FindAssociatedNodeItem(node);
-        }
-        return nodeItem;
+        NodeItem? nodeItem = node as NodeItem;
+
+            if (nodeItem is null)
+                nodeItem = nodeItemsControl.FindAssociatedNodeItem(node);
+            return nodeItem;
     }
 }

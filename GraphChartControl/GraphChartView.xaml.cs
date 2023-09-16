@@ -2,7 +2,6 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-using Bau.Controls.GraphChartControl.Views;
 using Bau.Libraries.GraphChart.ViewModels;
 
 namespace Bau.Controls.GraphChartControl;
@@ -12,11 +11,69 @@ namespace Bau.Controls.GraphChartControl;
 /// </summary>
 public partial class GraphChartView : UserControl
 {
+    /// <summary>
+    /// Defines the event handler for the ConnectionDragStarted event.
+    /// </summary>
+    public delegate void ConnectionDragStartedEventHandler(object sender, EventArguments.ConnectionDragStartedEventArgs e);
+
+    /// <summary>
+    /// Defines the event handler for the QueryConnectionFeedback event.
+    /// </summary>
+    public delegate void QueryConnectionFeedbackEventHandler(object sender, EventArguments.QueryConnectionFeedbackEventArgs e);
+
+    /// <summary>
+    /// Defines the event handler for the ConnectionDragging event.
+    /// </summary>
+    public delegate void ConnectionDraggingEventHandler(object sender, EventArguments.ConnectionDraggingEventArgs e);
+
+    /// <summary>
+    /// Defines the event handler for the ConnectionDragCompleted event.
+    /// </summary>
+    public delegate void ConnectionDragCompletedEventHandler(object sender, EventArguments.ConnectionDragCompletedEventArgs e);
+
+
 	public GraphChartView()
 	{
 		InitializeComponent();
         DataContext = ViewModel = new GraphChartViewModel();
 	}
+
+    /// <summary>
+    ///     Crea un nuevo nodo en la posición del raónt
+    /// </summary>
+    public void CreateNode()
+    {
+        Point newNodePosition = Mouse.GetPosition(networkControl);
+
+            // Crea un nodo
+            ViewModel.CreateNode($"Node {(ViewModel.Network.Nodes.Count + 1).ToString()}", newNodePosition, true);
+    }
+
+    /// <summary>
+    ///     Ejecución del comando DeleteSelectedNodes
+    /// </summary>
+    private void DeleteSelectedNodes_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        ViewModel.DeleteSelectedNodes();
+    }
+
+    /// <summary>
+    ///     Ejecución del comando DeleteNode
+    /// </summary>
+    private void DeleteNode_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (e.Parameter is NodeViewModel node)
+            ViewModel.DeleteNode(node);
+    }
+
+    /// <summary>
+    ///     Ejecución del comando DeleteConnection
+    /// </summary>
+    private void DeleteConnection_Executed(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (e.Parameter is ConnectionViewModel connection)
+            ViewModel.DeleteConnection(connection);
+    }
 
     /// <summary>
     /// Event raised when the size of a node has changed.
@@ -35,9 +92,9 @@ public partial class GraphChartView : UserControl
     /// <summary>
     /// Event raised when the user has started to drag out a connection.
     /// </summary>
-    private void networkControl_ConnectionDragStarted(object sender, ConnectionDragStartedEventArgs e)
+    private void networkControl_ConnectionDragStarted(object sender, EventArguments.ConnectionDragStartedEventArgs e)
     {
-        var draggedOutConnector = (ConnectorViewModel)e.ConnectorDraggedOut;
+        var draggedOutConnector = (ConnectorViewModel) e.ConnectorDraggedOut;
         var curDragPoint = Mouse.GetPosition(networkControl);
 
         //
@@ -55,10 +112,10 @@ public partial class GraphChartView : UserControl
     /// <summary>
     /// Event raised, to query for feedback, while the user is dragging a connection.
     /// </summary>
-    private void networkControl_QueryConnectionFeedback(object sender, QueryConnectionFeedbackEventArgs e)
+    private void networkControl_QueryConnectionFeedback(object sender, EventArguments.QueryConnectionFeedbackEventArgs e)
     {
-        var draggedOutConnector = (ConnectorViewModel)e.ConnectorDraggedOut;
-        var draggedOverConnector= (ConnectorViewModel)e.DraggedOverConnector;
+        var draggedOutConnector = (ConnectorViewModel) e.ConnectorDraggedOut;
+        var draggedOverConnector= (ConnectorViewModel) e.DraggedOverConnector;
         object feedbackIndicator = null;
         bool connectionOk = true;
 
@@ -78,67 +135,34 @@ public partial class GraphChartView : UserControl
     }
 
     /// <summary>
-    /// Event raised while the user is dragging a connection.
+    ///     Evento lanzado cuando el usuario arrastra una conexión
     /// </summary>
-    private void networkControl_ConnectionDragging(object sender, ConnectionDraggingEventArgs e)
+    private void networkControl_ConnectionDragging(object sender, EventArguments.ConnectionDraggingEventArgs e)
     {
         Point curDragPoint = Mouse.GetPosition(networkControl);
-        var connection = (ConnectionViewModel)e.Connection;
-        ViewModel.ConnectionDragging(curDragPoint, connection);
+            
+            // Arranca el evento de arrastrar una conexión
+            if (e.Connection is ConnectionViewModel connection)
+                ViewModel.ConnectionDragging(curDragPoint, connection);
     }
 
     /// <summary>
-    /// Event raised when the user has finished dragging out a connection.
+    ///     Evento lanzado cuando el usuario finaliza de arrastrar una conexión
     /// </summary>
-    private void networkControl_ConnectionDragCompleted(object sender, ConnectionDragCompletedEventArgs e)
+    private void networkControl_ConnectionDragCompleted(object sender, EventArguments.ConnectionDragCompletedEventArgs e)
     {
-        var connectorDraggedOut = (ConnectorViewModel)e.ConnectorDraggedOut;
-        var connectorDraggedOver = (ConnectorViewModel)e.ConnectorDraggedOver;
-        var newConnection = (ConnectionViewModel)e.Connection;
+        ConnectorViewModel connectorDraggedOut = (ConnectorViewModel) e.ConnectorDraggedOut;
+        ConnectorViewModel connectorDraggedOver = (ConnectorViewModel) e.ConnectorDraggedOver;
+        ConnectionViewModel newConnection = (ConnectionViewModel) e.Connection;
         ViewModel.ConnectionDragCompleted(newConnection, connectorDraggedOut, connectorDraggedOver);
     }
 
     /// <summary>
-    /// Event raised to create a new node.
+    ///     Ejecución del comando CreateNode
     /// </summary>
     private void CreateNode_Executed(object sender, ExecutedRoutedEventArgs e)
     {
         CreateNode();
-    }
-
-    /// <summary>
-    /// Creates a new node in the network at the current mouse location.
-    /// </summary>
-    public void CreateNode()
-    {
-        var newNodePosition = Mouse.GetPosition(networkControl);
-        ViewModel.CreateNode("New Node!", newNodePosition, true);
-    }
-
-    /// <summary>
-    /// Event raised to delete the selected node.
-    /// </summary>
-    private void DeleteSelectedNodes_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        ViewModel.DeleteSelectedNodes();
-    }
-
-    /// <summary>
-    /// Event raised to delete a node.
-    /// </summary>
-    private void DeleteNode_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        var node = (NodeViewModel)e.Parameter;
-        ViewModel.DeleteNode(node);
-    }
-
-    /// <summary>
-    /// Event raised to delete a connection.
-    /// </summary>
-    private void DeleteConnection_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        var connection = (ConnectionViewModel)e.Parameter;
-        ViewModel.DeleteConnection(connection);
     }
 
     /// <summary>

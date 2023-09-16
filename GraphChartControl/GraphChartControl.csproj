@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\ConnectionDragEvents.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\block_16.png" />
     <None Remove="Resources\scissors.png" />
     <None Remove="Resources\tick_16.png" />
