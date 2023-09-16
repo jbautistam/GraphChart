@@ -30,17 +30,17 @@ public sealed class ConnectionViewModel : BaseObservableObject
     /// <summary>
     ///     Evento lanzado cuando se modifica el punto de origen del conector
     /// </summary>
-    private void sourceConnector_HotspotUpdated(object sender, EventArgs e)
+    private void sourceConnector_HotspotUpdated(object? sender, EventArgs e)
     {
-        this.SourceConnectorHotspot = this.SourceConnector.Hotspot;
+        SourceConnectorHotspot = SourceConnector?.Hotspot ?? new Point();
     }
 
     /// <summary>
     ///     Evento lanzado cuando se modifica el punto de destino del conector
     /// </summary>
-    private void destConnector_HotspotUpdated(object sender, EventArgs e)
+    private void destConnector_HotspotUpdated(object? sender, EventArgs e)
     {
-        this.DestConnectorHotspot = this.DestConnector.Hotspot;
+        DestConnectorHotspot = DestConnector?.Hotspot ?? new Point();
     }
 
     /// <summary>
@@ -52,27 +52,31 @@ public sealed class ConnectionViewModel : BaseObservableObject
                                             {
                                                 SourceConnectorHotspot
                                             };
+        double deltaX = Math.Abs(DestConnectorHotspot.X - SourceConnectorHotspot.X);
+        double deltaY = Math.Abs(DestConnectorHotspot.Y - SourceConnectorHotspot.Y);
 
-        double deltaX = Math.Abs(this.DestConnectorHotspot.X - this.SourceConnectorHotspot.X);
-        double deltaY = Math.Abs(this.DestConnectorHotspot.Y - this.SourceConnectorHotspot.Y);
-        if (deltaX > deltaY)
-        {
-            double midPointX = this.SourceConnectorHotspot.X + ((this.DestConnectorHotspot.X - this.SourceConnectorHotspot.X) / 2);
-            computedPoints.Add(new Point(midPointX, this.SourceConnectorHotspot.Y));
-            computedPoints.Add(new Point(midPointX, this.DestConnectorHotspot.Y));
-        }
-        else
-        {
-            double midPointY = this.SourceConnectorHotspot.Y + ((this.DestConnectorHotspot.Y - this.SourceConnectorHotspot.Y) / 2);
-            computedPoints.Add(new Point(this.SourceConnectorHotspot.X, midPointY));
-            computedPoints.Add(new Point(this.DestConnectorHotspot.X, midPointY));
-        }
+            // Añade los puntos medios calculados
+            if (deltaX > deltaY)
+            {
+                double midPointX = SourceConnectorHotspot.X + ((DestConnectorHotspot.X - SourceConnectorHotspot.X) / 2);
 
-        computedPoints.Add(this.DestConnectorHotspot);
-        computedPoints.Freeze();
+                    computedPoints.Add(new Point(midPointX, SourceConnectorHotspot.Y));
+                    computedPoints.Add(new Point(midPointX, DestConnectorHotspot.Y));
+            }
+            else
+            {
+                double midPointY = SourceConnectorHotspot.Y + ((DestConnectorHotspot.Y - SourceConnectorHotspot.Y) / 2);
 
-        this.Points = computedPoints;
+                    computedPoints.Add(new Point(SourceConnectorHotspot.X, midPointY));
+                    computedPoints.Add(new Point(DestConnectorHotspot.X, midPointY));
+            }
+            // Añade los puntos de destino
+            computedPoints.Add(DestConnectorHotspot);
+            computedPoints.Freeze();
+            // Devuelve los puntos calculados
+            Points = computedPoints;
     }
+
     /// <summary>
     ///     Conector origen al que se adjunta la conexión
     /// </summary>
@@ -101,7 +105,7 @@ public sealed class ConnectionViewModel : BaseObservableObject
             {
                 _sourceConnector.AttachedConnections.Add(this);
                 _sourceConnector.HotspotUpdated += new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
-                this.SourceConnectorHotspot = _sourceConnector.Hotspot;
+                SourceConnectorHotspot = _sourceConnector.Hotspot;
             }
 
             OnPropertyChanged("SourceConnector");
@@ -137,7 +141,7 @@ public sealed class ConnectionViewModel : BaseObservableObject
             {
                 _targetConnector.AttachedConnections.Add(this);
                 _targetConnector.HotspotUpdated += new EventHandler<EventArgs>(destConnector_HotspotUpdated);
-                this.DestConnectorHotspot = _targetConnector.Hotspot;
+                DestConnectorHotspot = _targetConnector.Hotspot;
             }
 
             OnPropertyChanged("DestConnector");
