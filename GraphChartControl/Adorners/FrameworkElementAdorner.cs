@@ -24,14 +24,13 @@ public class FrameworkElementAdorner : Adorner
     public FrameworkElementAdorner(FrameworkElement adornerChildElement, FrameworkElement adornedElement,
                                    AdornedControl.AdornerPlacement horizontalAdornerPlacement = AdornedControl.AdornerPlacement.Inside, 
                                    AdornedControl.AdornerPlacement verticalAdornerPlacement = AdornedControl.AdornerPlacement.Inside,
-                                   double offsetX = 0, double offsetY = 0)
-        : base(adornedElement)
+                                   double offsetX = 0, double offsetY = 0) : base(adornedElement)
     {
         // Comprueba los argumentos
         if (adornedElement is null)
-            throw new ArgumentNullException("adornedElement");
+            throw new ArgumentNullException(nameof(adornedElement));
         if (adornerChildElement is null)
-            throw new ArgumentNullException("adornerChildElement");
+            throw new ArgumentNullException(nameof(adornerChildElement));
         // Asigna las propiedades
         Child = adornerChildElement;
         _horizontalAdornerPlacement = horizontalAdornerPlacement;
@@ -39,18 +38,11 @@ public class FrameworkElementAdorner : Adorner
         _offsetX = offsetX;
         _offsetY = offsetY;
         // Asigna el manejador para el evento de cambio de tamaño del elemento hijo
-        adornedElement.SizeChanged += new SizeChangedEventHandler(adornedElement_SizeChanged);
+        adornedElement.SizeChanged += (sender, args) => InvalidateMeasure();
+        // adornedElement.SizeChanged += new SizeChangedEventHandler(adornedElement_SizeChanged);
         // Añade los elementos hijo
         AddLogicalChild(adornerChildElement);
         AddVisualChild(adornerChildElement);
-    }
-
-    /// <summary>
-    ///     Evento lanzado cuando el tamaño del control adornado se ha modificado
-    /// </summary>
-    private void adornedElement_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        InvalidateMeasure();
     }
 
     /// <summary>
@@ -299,18 +291,12 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Número de elementos hijo
     /// </summary>
-    protected override int VisualChildrenCount
-    {
-        get { return 1; }
-    }
+    protected override int VisualChildrenCount => 1;
 
     /// <summary>
     ///     Obtiene uno de los controles hijo
     /// </summary>
-    protected override Visual GetVisualChild(int index)
-    {
-        return Child;
-    }
+    protected override Visual GetVisualChild(int index) => Child;
 
     /// <summary>
     ///     Control que se adorna
@@ -330,24 +316,10 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Enumera los controles hijo
     /// </summary>
-    protected override IEnumerator LogicalChildren
-    {
-        get
-        {
-            ArrayList list = new ArrayList();
-            list.Add(Child);
-            return list.GetEnumerator();
-        }
-    }
+    protected override IEnumerator LogicalChildren => new ArrayList { Child }.GetEnumerator();
 
     /// <summary>
     ///     Sobrescribe la propiedad AdornedElement de la clase base para no tener que comprobar constantemente el tipo
     /// </summary>
-    public new FrameworkElement AdornedElement
-    {
-        get
-        {
-            return (FrameworkElement)base.AdornedElement;
-        }
-    }
+    public new FrameworkElement AdornedElement => (FrameworkElement) base.AdornedElement;
 }
