@@ -4,38 +4,23 @@ using System.Windows.Media;
 using System.Collections;
 using System.Windows.Input;
 
-//
-// This code based on code available here:
-//
-//  http://www.codeproject.com/KB/WPF/WPFJoshSmith.aspx
-//
 namespace Bau.Controls.GraphChartControl.Adorners;
 
-//
-// This class is an adorner that allows a FrameworkElement derived class to adorn another FrameworkElement.
-//
+/// <summary>
+///     Esta clase es un <see cref="Adorner"/> que permite que una clase derivada de <see cref="FrameworkElement"/>
+/// adorne otro <see cref="FrameworkElement"/>
+/// </summary>
+/// <remarks>
+///     Basado en este código http://www.codeproject.com/KB/WPF/WPFJoshSmith.aspx
+/// </remarks>
 public class FrameworkElementAdorner : Adorner
 {
-    //
-    // The framework element that is the adorner. 
-    //
+    // Variables privadas
     private FrameworkElement child = null;
-
-    //
-    // Placement of the child.
-    //
     private AdornedControl.AdornerPlacement horizontalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
     private AdornedControl.AdornerPlacement verticalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
-
-    //
-    // Offset of the child.
-    //
     private double offsetX = 0.0;
     private double offsetY = 0.0;
-
-    //
-    // Position of the child (when not set to NaN).
-    //
     private double positionX = Double.NaN;
     private double positionY = Double.NaN;
 
@@ -86,16 +71,16 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Event raised when the adorned control's size has changed.
+    ///     Evento lanzado cuando el tamaño del control adornado se ha modificado
     /// </summary>
     private void adornedElement_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         InvalidateMeasure();
     }
 
-    //
-    // The framework element that is the adorner. 
-    //
+    /// <summary>
+    ///     Control que se adorna
+    /// </summary>
     public FrameworkElement Child
     {
         get
@@ -104,9 +89,9 @@ public class FrameworkElementAdorner : Adorner
         }
     }
 
-    //
-    // Position of the child (when not set to NaN).
-    //
+    /// <summary>
+    ///     Posición X del control hijo (se inicializa a NaN)
+    /// </summary>
     public double PositionX
     {
         get
@@ -119,6 +104,9 @@ public class FrameworkElementAdorner : Adorner
         }
     }
 
+    /// <summary>
+    ///     Posición X del control hijo (se inicializa a NaN)
+    /// </summary>
     public double PositionY
     {
         get
@@ -131,6 +119,9 @@ public class FrameworkElementAdorner : Adorner
         }
     }
 
+    /// <summary>
+    ///     Sobrecarga el método MeasureOverride
+    /// </summary>
     protected override Size MeasureOverride(Size constraint)
     {
         this.child.Measure(constraint);
@@ -138,7 +129,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Determine the X coordinate of the child.
+    ///     Determina la coordenada X del control hijo
     /// </summary>
     private double DetermineX()
     {
@@ -207,7 +198,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Determine the Y coordinate of the child.
+    ///     Determina la coordenada Y del control hijo
     /// </summary>
     private double DetermineY()
     {
@@ -276,7 +267,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Determine the width of the child.
+    ///     Determina el ancho del control hijo
     /// </summary>
     private double DetermineWidth()
     {
@@ -309,7 +300,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Determine the height of the child.
+    ///     Determina la altura del control hijo
     /// </summary>
     private double DetermineHeight()
     {
@@ -341,6 +332,9 @@ public class FrameworkElementAdorner : Adorner
         return 0.0;
     }
 
+    /// <summary>
+    ///     Redimensiona el tamaño
+    /// </summary>
     protected override Size ArrangeOverride(Size finalSize)
     {
         double x = PositionX;
@@ -359,16 +353,25 @@ public class FrameworkElementAdorner : Adorner
         return finalSize;
     }
 
+    /// <summary>
+    ///     Número de elementos hijo
+    /// </summary>
     protected override Int32 VisualChildrenCount
     {
         get { return 1; }
     }
 
+    /// <summary>
+    ///     Obtiene uno de los controles hijo
+    /// </summary>
     protected override Visual GetVisualChild(Int32 index)
     {
         return this.child;
     }
 
+    /// <summary>
+    ///     Enumera los controles hijo
+    /// </summary>
     protected override IEnumerator LogicalChildren
     {
         get
@@ -380,7 +383,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Disconnect the child element from the visual tree so that it may be reused later.
+    ///     Desconecta el elemento hijo del árbol visual para que se reutilice después
     /// </summary>
     public void DisconnectChild()
     {
@@ -389,7 +392,7 @@ public class FrameworkElementAdorner : Adorner
     }
 
     /// <summary>
-    /// Override AdornedElement from base class for less type-checking.
+    ///     Sobrescribe la propiedad AdornedElement de la clase base para no tener que comprobar constantemente el tipo
     /// </summary>
     public new FrameworkElement AdornedElement
     {
