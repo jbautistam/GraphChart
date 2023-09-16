@@ -56,6 +56,7 @@ public sealed class NetworkViewModel
                 connection.DestConnector = null;
             }
     }
+
     /// <summary>
     ///     Nodos de la red
     /// </summary>
