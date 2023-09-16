@@ -82,34 +82,30 @@ public sealed class ConnectionViewModel : BaseObservableObject
     /// </summary>
     public ConnectorViewModel? SourceConnector
     {
-        get
-        {
-            return _sourceConnector;
-        }
+        get { return _sourceConnector; }
         set
         {
-            if (_sourceConnector == value)
+            if (_sourceConnector != value)
             {
-                return;
+                // Elimina los puntos de origen y los eventos
+                if (_sourceConnector is not null)
+                {
+                    _sourceConnector.AttachedConnections.Remove(this);
+                    _sourceConnector.HotspotUpdated -= new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
+                }
+                // Asigna el punto de origen
+                _sourceConnector = value;
+                // Añade los puntos de origen y los eventos
+                if (_sourceConnector is not null)
+                {
+                    _sourceConnector.AttachedConnections.Add(this);
+                    _sourceConnector.HotspotUpdated += new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
+                    SourceConnectorHotspot = _sourceConnector.Hotspot;
+                }
+                // Lanza los eventos de modificación
+                OnPropertyChanged(nameof(SourceConnector));
+                OnConnectionChanged();
             }
-
-            if (_sourceConnector != null)
-            {
-                _sourceConnector.AttachedConnections.Remove(this);
-                _sourceConnector.HotspotUpdated -= new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
-            }
-
-            _sourceConnector = value;
-
-            if (_sourceConnector != null)
-            {
-                _sourceConnector.AttachedConnections.Add(this);
-                _sourceConnector.HotspotUpdated += new EventHandler<EventArgs>(sourceConnector_HotspotUpdated);
-                SourceConnectorHotspot = _sourceConnector.Hotspot;
-            }
-
-            OnPropertyChanged("SourceConnector");
-            OnConnectionChanged();
         }
     }
 
@@ -118,34 +114,30 @@ public sealed class ConnectionViewModel : BaseObservableObject
     /// </summary>
     public ConnectorViewModel? DestConnector
     {
-        get
-        {
-            return _targetConnector;
-        }
+        get { return _targetConnector; }
         set
         {
-            if (_targetConnector == value)
+            if (_targetConnector != value)
             {
-                return;
+                // Elimina los puntos de destino y los eventos
+                if (_targetConnector is not null)
+                {
+                    _targetConnector.AttachedConnections.Remove(this);
+                    _targetConnector.HotspotUpdated -= new EventHandler<EventArgs>(destConnector_HotspotUpdated);
+                }
+                // Asigna el punto de destino
+                _targetConnector = value;
+                // Añade los puntos de destino y los eventos
+                if (_targetConnector is not null)
+                {
+                    _targetConnector.AttachedConnections.Add(this);
+                    _targetConnector.HotspotUpdated += new EventHandler<EventArgs>(destConnector_HotspotUpdated);
+                    DestConnectorHotspot = _targetConnector.Hotspot;
+                }
+                // Lanza los eventos de modificación
+                OnPropertyChanged(nameof(DestConnector));
+                OnConnectionChanged();
             }
-
-            if (_targetConnector != null)
-            {
-                _targetConnector.AttachedConnections.Remove(this);
-                _targetConnector.HotspotUpdated -= new EventHandler<EventArgs>(destConnector_HotspotUpdated);
-            }
-
-            _targetConnector = value;
-
-            if (_targetConnector != null)
-            {
-                _targetConnector.AttachedConnections.Add(this);
-                _targetConnector.HotspotUpdated += new EventHandler<EventArgs>(destConnector_HotspotUpdated);
-                DestConnectorHotspot = _targetConnector.Hotspot;
-            }
-
-            OnPropertyChanged("DestConnector");
-            OnConnectionChanged();
         }
     }
 
