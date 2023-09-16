@@ -16,7 +16,6 @@ namespace Bau.Controls.GraphChartControl.Adorners;
 public class FrameworkElementAdorner : Adorner
 {
     // Variables privadas
-    private FrameworkElement _child = null;
     private AdornedControl.AdornerPlacement _horizontalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
     private AdornedControl.AdornerPlacement _verticalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
     private double _offsetX = 0.0;
@@ -34,7 +33,7 @@ public class FrameworkElementAdorner : Adorner
         if (adornerChildElement is null)
             throw new ArgumentNullException("adornerChildElement");
         // Asigna las propiedades
-        _child = adornerChildElement;
+        Child = adornerChildElement;
         _horizontalAdornerPlacement = horizontalAdornerPlacement;
         _verticalAdornerPlacement = verticalAdornerPlacement;
         _offsetX = offsetX;
@@ -59,8 +58,8 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     protected override Size MeasureOverride(Size constraint)
     {
-        _child.Measure(constraint);
-        return _child.DesiredSize;
+        Child.Measure(constraint);
+        return Child.DesiredSize;
     }
 
     /// <summary>
@@ -68,19 +67,19 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     private double DetermineX()
     {
-        switch (_child.HorizontalAlignment)
+        switch (Child.HorizontalAlignment)
         {
             case HorizontalAlignment.Left:
             {
                 if (_horizontalAdornerPlacement == AdornedControl.AdornerPlacement.Mouse)
                 {
-                    double adornerWidth = _child.DesiredSize.Width;
+                    double adornerWidth = Child.DesiredSize.Width;
                     Point position = Mouse.GetPosition(AdornerLayer.GetAdornerLayer(AdornedElement));
                     return (position.X - adornerWidth) + _offsetX;
                 }
                 else if (_horizontalAdornerPlacement == AdornedControl.AdornerPlacement.Outside)
                 {
-                    return -_child.DesiredSize.Width + _offsetX;
+                    return -Child.DesiredSize.Width + _offsetX;
                 }
                 else
                 {
@@ -101,7 +100,7 @@ public class FrameworkElementAdorner : Adorner
                 }
                 else
                 {
-                    double adornerWidth = _child.DesiredSize.Width;
+                    double adornerWidth = Child.DesiredSize.Width;
                     double adornedWidth = AdornedElement.ActualWidth;
                     double x = adornedWidth - adornerWidth;
                     return x + _offsetX;
@@ -109,7 +108,7 @@ public class FrameworkElementAdorner : Adorner
             }
             case HorizontalAlignment.Center:
             {
-                double adornerWidth = _child.DesiredSize.Width;
+                double adornerWidth = Child.DesiredSize.Width;
 
                 if (_horizontalAdornerPlacement == AdornedControl.AdornerPlacement.Mouse)
                 {
@@ -137,19 +136,19 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     private double DetermineY()
     {
-        switch (_child.VerticalAlignment)
+        switch (Child.VerticalAlignment)
         {
             case VerticalAlignment.Top:
             {
                 if (_verticalAdornerPlacement == AdornedControl.AdornerPlacement.Mouse)
                 {
-                    double adornerWidth = _child.DesiredSize.Width;
+                    double adornerWidth = Child.DesiredSize.Width;
                     Point position = Mouse.GetPosition(AdornerLayer.GetAdornerLayer(AdornedElement));
                     return (position.Y - adornerWidth) + _offsetY;
                 }
                 else if (_verticalAdornerPlacement == AdornedControl.AdornerPlacement.Outside)
                 {
-                    return -_child.DesiredSize.Height + _offsetY;
+                    return -Child.DesiredSize.Height + _offsetY;
                 }
                 else
                 {
@@ -170,7 +169,7 @@ public class FrameworkElementAdorner : Adorner
                 }
                 else
                 {
-                    double adornerHeight = _child.DesiredSize.Height;
+                    double adornerHeight = Child.DesiredSize.Height;
                     double adornedHeight = AdornedElement.ActualHeight;
                     double x = adornedHeight - adornerHeight;
                     return x + _offsetY;
@@ -178,7 +177,7 @@ public class FrameworkElementAdorner : Adorner
             }
             case VerticalAlignment.Center:
             {
-                double adornerHeight = _child.DesiredSize.Height;
+                double adornerHeight = Child.DesiredSize.Height;
 
                 if (_verticalAdornerPlacement == AdornedControl.AdornerPlacement.Mouse)
                 {
@@ -208,22 +207,22 @@ public class FrameworkElementAdorner : Adorner
     {
         if (!double.IsNaN(PositionX))
         {
-            return _child.DesiredSize.Width;
+            return Child.DesiredSize.Width;
         }
 
-        switch (_child.HorizontalAlignment)
+        switch (Child.HorizontalAlignment)
         {
             case HorizontalAlignment.Left:
             {
-                return _child.DesiredSize.Width;
+                return Child.DesiredSize.Width;
             }
             case HorizontalAlignment.Right:
             {
-                return _child.DesiredSize.Width;
+                return Child.DesiredSize.Width;
             }
             case HorizontalAlignment.Center:
             {
-                return _child.DesiredSize.Width;
+                return Child.DesiredSize.Width;
             }
             case HorizontalAlignment.Stretch:
             {
@@ -241,22 +240,22 @@ public class FrameworkElementAdorner : Adorner
     {
         if (!double.IsNaN(PositionY))
         {
-            return _child.DesiredSize.Height;
+            return Child.DesiredSize.Height;
         }
 
-        switch (_child.VerticalAlignment)
+        switch (Child.VerticalAlignment)
         {
             case VerticalAlignment.Top:
             {
-                return _child.DesiredSize.Height;
+                return Child.DesiredSize.Height;
             }
             case VerticalAlignment.Bottom:
             {
-                return _child.DesiredSize.Height;
+                return Child.DesiredSize.Height;
             }
             case VerticalAlignment.Center:
             {
-                return _child.DesiredSize.Height; 
+                return Child.DesiredSize.Height; 
             }
             case VerticalAlignment.Stretch:
             {
@@ -284,7 +283,7 @@ public class FrameworkElementAdorner : Adorner
         }
         double adornerWidth = DetermineWidth();
         double adornerHeight = DetermineHeight();
-        _child.Arrange(new Rect(x, y, adornerWidth, adornerHeight));
+        Child.Arrange(new Rect(x, y, adornerWidth, adornerHeight));
         return finalSize;
     }
 
@@ -293,8 +292,8 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     public void DisconnectChild()
     {
-        RemoveLogicalChild(_child);
-        RemoveVisualChild(_child);
+        RemoveLogicalChild(Child);
+        RemoveVisualChild(Child);
     }
 
     /// <summary>
@@ -310,19 +309,13 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     protected override Visual GetVisualChild(int index)
     {
-        return _child;
+        return Child;
     }
 
     /// <summary>
     ///     Control que se adorna
     /// </summary>
-    public FrameworkElement Child
-    {
-        get
-        {
-            return _child;
-        }
-    }
+    public FrameworkElement Child { get; }
 
     /// <summary>
     ///     Posición X del control hijo (se inicializa a NaN)
@@ -342,7 +335,7 @@ public class FrameworkElementAdorner : Adorner
         get
         {
             ArrayList list = new ArrayList();
-            list.Add(_child);
+            list.Add(Child);
             return list.GetEnumerator();
         }
     }
