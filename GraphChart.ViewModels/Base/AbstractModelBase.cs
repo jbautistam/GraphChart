@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace BauMvvm.Views.Wpf;
+namespace Bau.Libraries.GraphChart.ViewModels.Base;
 
 /// <summary>
 /// Abstract base for view-model classes that need to implement INotifyPropertyChanged.

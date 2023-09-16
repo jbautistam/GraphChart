@@ -1,43 +1,41 @@
 ﻿using System.Windows;
 
-using BauMvvm.Views.Wpf;
+using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Libraries.GraphChart.ViewModels;
 
 /// <summary>
 /// Defines a connector (aka connection point) that can be attached to a node and is used to connect the node to another node.
 /// </summary>
-public sealed class ConnectorViewModel : AbstractModelBase
+public sealed class ConnectorViewModel : BaseObservableObject
 {
     /// <summary>
-    /// Defines the type of a connector (aka connection point).
+    ///     Tipo del conector
     /// </summary>
     public enum ConnectorType
     {
+        /// <summary>Indefinido</summary>
         Undefined,
+        /// <summary>Conector de entrada</summary>
         Input,
-        Output,
+        /// <summary>Conector de salida</summary>
+        Output
     }
+    // Eventos públicos
+    public event EventHandler<EventArgs>? HotspotUpdated;
 
-    /// <summary>
-    /// The connections that are attached to this connector, or null if no connections are attached.
-    /// </summary>
-    private ImpObservableCollection<ConnectionViewModel> attachedConnections = null;
-
-    /// <summary>
-    /// The hotspot (or center) of the connector.
-    /// This is pushed through from ConnectorItem in the UI.
-    /// </summary>
-    private Point hotspot;
+    // Variables privadas
+    private ImpObservableCollection<ConnectionViewModel> _attachedConnections = new();
+    private Point hotspot; // Punto o centro del conector (asociado a ConnectorItem)
 
     public ConnectorViewModel(string name)
     {
-        this.Name = name;
-        this.Type = ConnectorType.Undefined;
+        Name = name;
+        Type = ConnectorType.Undefined;
     }
 
     /// <summary>
-    /// The name of the connector.
+    ///     Nombre del conector
     /// </summary>
     public string Name
     {
@@ -46,7 +44,7 @@ public sealed class ConnectorViewModel : AbstractModelBase
     }
 
     /// <summary>
-    /// Defines the type of the connector.
+    ///     Tipo del conector
     /// </summary>
     public ConnectorType Type
     {
@@ -55,63 +53,48 @@ public sealed class ConnectorViewModel : AbstractModelBase
     }
 
     /// <summary>
-    /// Returns 'true' if the connector connected to another node.
+    ///     Comprueba si el conector está conectado a otro nodo
     /// </summary>
     public bool IsConnected
     {
         get
         {
-            foreach (var connection in AttachedConnections)
-            {
-                if (connection.SourceConnector != null &&
-                    connection.DestConnector != null)
-                {
+            // Comprueba si hay una conexión origen y destino
+            foreach (ConnectionViewModel connection in AttachedConnections)
+                if (connection.SourceConnector != null && connection.DestConnector != null)
                     return true;
-                }
-            }
-
+            // Si ha llegado hasta aquí es porque no ha encontrado nada
             return false;
         }
     }
 
     /// <summary>
-    /// Returns 'true' if a connection is attached to the connector.
-    /// The other end of the connection may or may not be attached to a node.
+    ///     Comrpueba si tiene alguna conexión origen o destino
     /// </summary>
-    public bool IsConnectionAttached
-    {
-        get
-        {
-            return AttachedConnections.Count > 0;
-        }
-    }
+    public bool IsConnectionAttached => AttachedConnections.Count > 0;
 
     /// <summary>
-    /// The connections that are attached to this connector, or null if no connections are attached.
+    ///     Conexiones asociadas al conector
     /// </summary>
     public ImpObservableCollection<ConnectionViewModel> AttachedConnections
     {
         get
         {
-            if (attachedConnections == null)
+            if (_attachedConnections is null)
             {
-                attachedConnections = new ImpObservableCollection<ConnectionViewModel>();
-                attachedConnections.ItemsAdded += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsAdded);
-                attachedConnections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsRemoved);
+                _attachedConnections = new ImpObservableCollection<ConnectionViewModel>();
+                _attachedConnections.ItemsAdded += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsAdded);
+                _attachedConnections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(attachedConnections_ItemsRemoved);
             }
 
-            return attachedConnections;
+            return _attachedConnections;
         }
     }
 
     /// <summary>
-    /// The parent node that the connector is attached to, or null if the connector is not attached to any node.
+    ///     Nodo al que está asociado el conector o nulo si no está asociado a nada
     /// </summary>
-    public NodeViewModel ParentNode
-    {
-        get;
-        internal set;
-    }
+    public NodeViewModel? ParentNode { get; internal set; }
 
     /// <summary>
     /// The hotspot (or center) of the connector.
@@ -135,11 +118,6 @@ public sealed class ConnectorViewModel : AbstractModelBase
             OnHotspotUpdated();
         }
     }
-
-    /// <summary>
-    /// Event raised when the connector hotspot has been updated.
-    /// </summary>
-    public event EventHandler<EventArgs> HotspotUpdated;
 
     /// <summary>
     /// Debug checking to ensure that no connection is added to the list twice.
@@ -193,15 +171,13 @@ public sealed class ConnectorViewModel : AbstractModelBase
     }
 
     /// <summary>
-    /// Called when the connector hotspot has been updated.
+    ///     Método al que se llama cuando se modifica el punto de entrada del conector
     /// </summary>
     private void OnHotspotUpdated()
     {
+        // Lanza el evento de propiedad cambiada
         OnPropertyChanged("Hotspot");
-
-        if (HotspotUpdated != null)
-        {
-            HotspotUpdated(this, EventArgs.Empty);
-        }
-    }
+        // Llama al evento
+		HotspotUpdated?.Invoke(this, EventArgs.Empty);
+	}
 }

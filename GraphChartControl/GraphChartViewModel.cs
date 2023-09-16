@@ -1,205 +1,26 @@
 ﻿using System.Windows;
 
-using BauMvvm.Views.Wpf;
 using Bau.Libraries.GraphChart.ViewModels;
+using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Controls.GraphChartControl;
 
 /// <summary>
 ///		ViewModel del control de gráficos
 /// </summary>
-public class GraphChartViewModel : AbstractModelBase
+public class GraphChartViewModel : BaseObservableObject
 {
-	/// <summary>
-	/// This is the network that is displayed in the window.
-	/// It is the main part of the view-model.
-	/// </summary>
-	private NetworkViewModel network = null;
-
-	///
-	/// The current scale at which the content is being viewed.
-	/// 
-	private double contentScale = 1;
-
-	///
-	/// The X coordinate of the offset of the viewport onto the content (in content coordinates).
-	/// 
-	private double contentOffsetX = 0;
-
-	///
-	/// The Y coordinate of the offset of the viewport onto the content (in content coordinates).
-	/// 
-	private double contentOffsetY = 0;
-
-	///
-	/// The width of the content (in content coordinates).
-	/// 
-	private double contentWidth = 1000;
-
-	///
-	/// The heigth of the content (in content coordinates).
-	/// 
-	private double contentHeight = 1000;
-
-	///
-	/// The width of the viewport onto the content (in content coordinates).
-	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
-	/// view-model so that the value can be shared with the overview window.
-	/// 
-	private double contentViewportWidth = 0;
-
-	///
-	/// The height of the viewport onto the content (in content coordinates).
-	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
-	/// view-model so that the value can be shared with the overview window.
-	/// 
-	private double contentViewportHeight = 0;
+	// Variables privadas
+	private double _contentScale = 1;
+	private double _contentOffsetX, _contentOffsetY, _contentViewportWidth, _contentViewportHeight;
+	private double _contentWidth = 1000;
+	private double _contentHeight = 1000;
+	private NetworkViewModel _networkViewModel = default!;
 
 	public GraphChartViewModel()
 	{
-		// Add some test data to the view-model.
+		Network = new NetworkViewModel();
 		PopulateWithTestData();
-	}
-
-	/// <summary>
-	/// This is the network that is displayed in the window.
-	/// It is the main part of the view-model.
-	/// </summary>
-	public NetworkViewModel Network
-	{
-		get
-		{
-			return network;
-		}
-		set
-		{
-			network = value;
-
-			OnPropertyChanged("Network");
-		}
-	}
-
-	///
-	/// The current scale at which the content is being viewed.
-	/// 
-	public double ContentScale
-	{
-		get
-		{
-			return contentScale;
-		}
-		set
-		{
-			contentScale = value;
-
-			OnPropertyChanged("ContentScale");
-		}
-	}
-
-	///
-	/// The X coordinate of the offset of the viewport onto the content (in content coordinates).
-	/// 
-	public double ContentOffsetX
-	{
-		get
-		{
-			return contentOffsetX;
-		}
-		set
-		{
-			contentOffsetX = value;
-
-			OnPropertyChanged("ContentOffsetX");
-		}
-	}
-
-	///
-	/// The Y coordinate of the offset of the viewport onto the content (in content coordinates).
-	/// 
-	public double ContentOffsetY
-	{
-		get
-		{
-			return contentOffsetY;
-		}
-		set
-		{
-			contentOffsetY = value;
-
-			OnPropertyChanged("ContentOffsetY");
-		}
-	}
-
-	///
-	/// The width of the content (in content coordinates).
-	/// 
-	public double ContentWidth
-	{
-		get
-		{
-			return contentWidth;
-		}
-		set
-		{
-			contentWidth = value;
-
-			OnPropertyChanged("ContentWidth");
-		}
-	}
-
-	///
-	/// The heigth of the content (in content coordinates).
-	/// 
-	public double ContentHeight
-	{
-		get
-		{
-			return contentHeight;
-		}
-		set
-		{
-			contentHeight = value;
-
-			OnPropertyChanged("ContentHeight");
-		}
-	}
-
-	///
-	/// The width of the viewport onto the content (in content coordinates).
-	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
-	/// view-model so that the value can be shared with the overview window.
-	/// 
-	public double ContentViewportWidth
-	{
-		get
-		{
-			return contentViewportWidth;
-		}
-		set
-		{
-			contentViewportWidth = value;
-
-			OnPropertyChanged("ContentViewportWidth");
-		}
-	}
-
-	///
-	/// The heigth of the viewport onto the content (in content coordinates).
-	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
-	/// view-model so that the value can be shared with the overview window.
-	/// 
-	public double ContentViewportHeight
-	{
-		get
-		{
-			return contentViewportHeight;
-		}
-		set
-		{
-			contentViewportHeight = value;
-
-			OnPropertyChanged("ContentViewportHeight");
-		}
 	}
 
 	/// <summary>
@@ -355,14 +176,14 @@ public class GraphChartViewModel : AbstractModelBase
 	/// Retrieve a connection between the two connectors.
 	/// Returns null if there is no connection between the connectors.
 	/// </summary>
-	public ConnectionViewModel FindConnection(ConnectorViewModel connector1, ConnectorViewModel connector2)
+	public ConnectionViewModel? FindConnection(ConnectorViewModel start, ConnectorViewModel end)
 	{
 		//
 		// Figure out which one is the source connector and which one is the
 		// destination connector based on their connector types.
 		//
-		var sourceConnector = connector1.Type == ConnectorViewModel.ConnectorType.Output ? connector1 : connector2;
-		var destConnector = connector1.Type == ConnectorViewModel.ConnectorType.Output ? connector2 : connector1;
+		var sourceConnector = start.Type == ConnectorViewModel.ConnectorType.Output ? start : end;
+		var destConnector = start.Type == ConnectorViewModel.ConnectorType.Output ? end : start;
 
 		//
 		// Now we can just iterate attached connections of the source
@@ -377,32 +198,19 @@ public class GraphChartViewModel : AbstractModelBase
 	}
 
 	/// <summary>
-	/// Delete the currently selected nodes from the view-model.
+	///		Elimina los nodos seleccionados del ViewModel
 	/// </summary>
 	public void DeleteSelectedNodes()
 	{
-		// Take a copy of the selected nodes list so we can delete nodes while iterating.
-		var nodesCopy = this.Network.Nodes.ToArray();
-		foreach (var node in nodesCopy)
-			if (node.IsSelected)
-				DeleteNode(node);
+		Network.DeleteSelectedNodes();
 	}
 
 	/// <summary>
-	/// Delete the node from the view-model.
-	/// Also deletes any connections to or from the node.
+	///		Borra los datos de un nodo y sus conectores asociados
 	/// </summary>
 	public void DeleteNode(NodeViewModel node)
 	{
-		//
-		// Remove all connections attached to the node.
-		//
-		this.Network.Connections.RemoveRange(node.AttachedConnections);
-
-		//
-		// Remove the node from the network.
-		//
-		this.Network.Nodes.Remove(node);
+		Network.DeleteNode(node);
 	}
 
 	/// <summary>
@@ -500,5 +308,82 @@ public class GraphChartViewModel : AbstractModelBase
 		// Add the connection to the view-model.
 		//
 		this.Network.Connections.Add(connection);
+	}
+
+	/// <summary>
+	/// This is the network that is displayed in the window.
+	/// It is the main part of the view-model.
+	/// </summary>
+	public NetworkViewModel Network
+	{
+		get { return _networkViewModel; }
+		set { CheckObject(ref _networkViewModel, value); }
+	}
+
+	///
+	/// The current scale at which the content is being viewed.
+	/// 
+	public double ContentScale
+	{
+		get { return _contentScale; }
+		set { CheckProperty(ref _contentScale, value); }
+	}
+
+	///
+	/// The X coordinate of the offset of the viewport onto the content (in content coordinates).
+	/// 
+	public double ContentOffsetX
+	{
+		get { return _contentOffsetX; }
+		set { CheckProperty(ref _contentOffsetX, value); }
+	}
+
+	///
+	/// The Y coordinate of the offset of the viewport onto the content (in content coordinates).
+	/// 
+	public double ContentOffsetY
+	{
+		get { return _contentOffsetY; }
+		set { CheckProperty(ref _contentOffsetY, value); }
+	}
+
+	///
+	/// The width of the content (in content coordinates).
+	/// 
+	public double ContentWidth
+	{
+		get { return _contentWidth; }
+		set { CheckProperty(ref _contentWidth, value); }
+	}
+
+	///
+	/// The heigth of the content (in content coordinates).
+	/// 
+	public double ContentHeight
+	{
+		get { return _contentHeight; }
+		set { CheckProperty(ref _contentHeight, value); }
+	}
+
+	///
+	/// The width of the viewport onto the content (in content coordinates).
+	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
+	/// view-model so that the value can be shared with the overview window.
+	/// 
+	public double ContentViewportWidth
+	{
+		get { return _contentViewportWidth; }
+		set { CheckProperty(ref _contentViewportWidth, value); }
+	}
+
+	///
+	/// The heigth of the viewport onto the content (in content coordinates).
+	/// The value for this is actually computed by the main window's ZoomAndPanControl and update in the
+	/// view-model so that the value can be shared with the overview window.
+	/// 
+	public double ContentViewportHeight
+	{
+		get { return _contentViewportHeight; }
+		set { CheckProperty(ref _contentViewportHeight, value); }
 	}
 }

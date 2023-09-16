@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Windows.Media;
 using System.Windows.Input;
 
-using BauMvvm.Views.Wpf;
+using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Controls.GraphChartControl.Views;
 

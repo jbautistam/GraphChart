@@ -1,64 +1,91 @@
-﻿using BauMvvm.Views.Wpf;
+﻿using Bau.Libraries.GraphChart.ViewModels.Base;
 
 namespace Bau.Libraries.GraphChart.ViewModels;
 
 /// <summary>
-/// Defines a network of nodes and connections between the nodes.
+///     Declara una red de notods y las conexiones entre los nodos
 /// </summary>
 public sealed class NetworkViewModel
 {
-    /// <summary>
-    /// The collection of nodes in the network.
-    /// </summary>
-    private ImpObservableCollection<NodeViewModel> nodes = null;
+    // Variables privadas
+    private ImpObservableCollection<NodeViewModel> _nodes = default!;
+    private ImpObservableCollection<ConnectionViewModel> _connections = default!;
+
+	/// <summary>
+	///     Elimina los nodos seleccionados
+	/// </summary>
+	public void DeleteSelectedNodes()
+	{
+        for (int index = Nodes.Count - 1; index >= 0; index--)
+        {
+            // Elimina las conexiones
+            DeleteConnections(Nodes[index]);
+            // Elimina el nodo
+            Nodes.RemoveAt(index);
+        }
+	}
+
+	/// <summary>
+	///     Elimina los datos de un nodo
+	/// </summary>
+	public void DeleteNode(NodeViewModel node)
+	{
+        // Elimina las conexiones asociadas al nodo
+        DeleteConnections(node);
+        // Elimina el nodo de la red
+		Nodes.Remove(node);
+	}
 
     /// <summary>
-    /// The collection of connections in the network.
+    ///     Elimina las conexiones del nodo
     /// </summary>
-    private ImpObservableCollection<ConnectionViewModel> connections = null;
+	private void DeleteConnections(NodeViewModel node)
+	{
+		Connections.RemoveRange(node.AttachedConnections);
+	}
 
+	/// <summary>
+	///     Evento lanzado cuando se eliminan las conexiones
+	/// </summary>
+	private void connections_ItemsRemoved(object? sender, CollectionItemsChangedEventArgs e)
+    {
+        if (e.Items is not null)
+            foreach (ConnectionViewModel connection in e.Items)
+            {
+                connection.SourceConnector = null;
+                connection.DestConnector = null;
+            }
+    }
     /// <summary>
-    /// The collection of nodes in the network.
+    ///     Nodos de la red
     /// </summary>
     public ImpObservableCollection<NodeViewModel> Nodes
     {
         get
         {
-            if (nodes == null)
-            {
-                nodes = new ImpObservableCollection<NodeViewModel>();
-            }
-
-            return nodes;
+            // Genera los nodos si no existían
+            if (_nodes is null)
+                _nodes = new ImpObservableCollection<NodeViewModel>();
+            // Devuelve lalista de nodos
+            return _nodes;
         }
     }
 
     /// <summary>
-    /// The collection of connections in the network.
+    ///     Conexiones de la red
     /// </summary>
     public ImpObservableCollection<ConnectionViewModel> Connections
     {
         get
         {
-            if (connections == null)
+            // Genera las conexiones si no existían
+            if (_connections is null)
             {
-                connections = new ImpObservableCollection<ConnectionViewModel>();
-                connections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(connections_ItemsRemoved);
+                _connections = new ImpObservableCollection<ConnectionViewModel>();
+                _connections.ItemsRemoved += new EventHandler<CollectionItemsChangedEventArgs>(connections_ItemsRemoved);
             }
-
-            return connections;
-        }
-    }
-
-    /// <summary>
-    /// Event raised then Connections have been removed.
-    /// </summary>
-    private void connections_ItemsRemoved(object sender, CollectionItemsChangedEventArgs e)
-    {
-        foreach (ConnectionViewModel connection in e.Items)
-        {
-            connection.SourceConnector = null;
-            connection.DestConnector = null;
+            // Devuelve la lista de conexiones
+            return _connections;
         }
     }
 }
