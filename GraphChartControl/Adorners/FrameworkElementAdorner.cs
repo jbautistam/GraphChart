@@ -50,7 +50,9 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     protected override Size MeasureOverride(Size constraint)
     {
+        // Mide los elementos hijo
         Child.Measure(constraint);
+        // Devuelve el tamaño deseado
         return Child.DesiredSize;
     }
 
@@ -70,13 +72,9 @@ public class FrameworkElementAdorner : Adorner
                     return (position.X - adornerWidth) + _offsetX;
                 }
                 else if (_horizontalAdornerPlacement == AdornedControl.AdornerPlacement.Outside)
-                {
                     return -Child.DesiredSize.Width + _offsetX;
-                }
                 else
-                {
                     return _offsetX;
-                }
             }
             case HorizontalAlignment.Right:
             {
@@ -115,12 +113,10 @@ public class FrameworkElementAdorner : Adorner
                 }
             }
             case HorizontalAlignment.Stretch:
-            {
                 return 0.0;
-            }
+            default:
+                return 0.0;
         }
-
-        return 0.0;
     }
 
     /// <summary>
@@ -139,13 +135,9 @@ public class FrameworkElementAdorner : Adorner
                     return (position.Y - adornerWidth) + _offsetY;
                 }
                 else if (_verticalAdornerPlacement == AdornedControl.AdornerPlacement.Outside)
-                {
                     return -Child.DesiredSize.Height + _offsetY;
-                }
                 else
-                {
                     return _offsetY;
-                }
             }
             case VerticalAlignment.Bottom:
             {
@@ -184,12 +176,10 @@ public class FrameworkElementAdorner : Adorner
                 }
             }
             case VerticalAlignment.Stretch:
-            {
                 return 0.0;
-            }
+            default:
+                return 0.0;
         }
-
-        return 0.0;
     }
 
     /// <summary>
@@ -198,31 +188,21 @@ public class FrameworkElementAdorner : Adorner
     private double DetermineWidth()
     {
         if (!double.IsNaN(PositionX))
-        {
             return Child.DesiredSize.Width;
-        }
-
-        switch (Child.HorizontalAlignment)
-        {
-            case HorizontalAlignment.Left:
+        else
+            switch (Child.HorizontalAlignment)
             {
-                return Child.DesiredSize.Width;
+                case HorizontalAlignment.Left:
+                    return Child.DesiredSize.Width;
+                case HorizontalAlignment.Right:
+                    return Child.DesiredSize.Width;
+                case HorizontalAlignment.Center:
+                    return Child.DesiredSize.Width;
+                case HorizontalAlignment.Stretch:
+                    return AdornedElement.ActualWidth;
+                default:
+                    return 0.0;
             }
-            case HorizontalAlignment.Right:
-            {
-                return Child.DesiredSize.Width;
-            }
-            case HorizontalAlignment.Center:
-            {
-                return Child.DesiredSize.Width;
-            }
-            case HorizontalAlignment.Stretch:
-            {
-                return AdornedElement.ActualWidth;
-            }
-        }
-
-        return 0.0;
     }
 
     /// <summary>
@@ -231,31 +211,21 @@ public class FrameworkElementAdorner : Adorner
     private double DetermineHeight()
     {
         if (!double.IsNaN(PositionY))
-        {
             return Child.DesiredSize.Height;
-        }
-
-        switch (Child.VerticalAlignment)
-        {
-            case VerticalAlignment.Top:
+        else
+            switch (Child.VerticalAlignment)
             {
-                return Child.DesiredSize.Height;
+                case VerticalAlignment.Top:
+                    return Child.DesiredSize.Height;
+                case VerticalAlignment.Bottom:
+                    return Child.DesiredSize.Height;
+                case VerticalAlignment.Center:
+                    return Child.DesiredSize.Height; 
+                case VerticalAlignment.Stretch:
+                    return AdornedElement.ActualHeight;
+                default:
+                    return 0.0;
             }
-            case VerticalAlignment.Bottom:
-            {
-                return Child.DesiredSize.Height;
-            }
-            case VerticalAlignment.Center:
-            {
-                return Child.DesiredSize.Height; 
-            }
-            case VerticalAlignment.Stretch:
-            {
-                return AdornedElement.ActualHeight;
-            }
-        }
-
-        return 0.0;
     }
 
     /// <summary>
@@ -263,20 +233,17 @@ public class FrameworkElementAdorner : Adorner
     /// </summary>
     protected override Size ArrangeOverride(Size finalSize)
     {
-        double x = PositionX;
-        if (double.IsNaN(x))
-        {
-            x = DetermineX();
-        }
-        double y = PositionY;
-        if (double.IsNaN(y))
-        {
-            y = DetermineY();
-        }
-        double adornerWidth = DetermineWidth();
-        double adornerHeight = DetermineHeight();
-        Child.Arrange(new Rect(x, y, adornerWidth, adornerHeight));
-        return finalSize;
+        double x = PositionX, y = PositionY;
+
+            // Determina las posiciones X e Y
+            if (double.IsNaN(x))
+                x = DetermineX();
+            if (double.IsNaN(y))
+                y = DetermineY();
+            // Calcula el tamaño
+            Child.Arrange(new Rect(x, y, DetermineWidth(), DetermineHeight()));
+            // Devuelve el tamaño final
+            return finalSize;
     }
 
     /// <summary>

@@ -21,7 +21,7 @@ public class AdornedControl : ContentControl
     {
         Inside,
         Outside,
-        Mouse,
+        Mouse
     }
     /// <summary>
     /// Dependency properties.
