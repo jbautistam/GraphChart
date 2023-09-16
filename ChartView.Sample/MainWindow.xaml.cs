@@ -24,7 +24,6 @@ public partial class MainWindow : Window
     {
     }
 
-
 	private void CreateNode_Click(object sender, RoutedEventArgs e)
 	{
         CreateNode();
