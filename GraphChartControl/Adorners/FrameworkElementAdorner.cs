@@ -16,8 +16,8 @@ public class FrameworkElementAdorner : Adorner
     private AdornedControl.AdornerPlacement _verticalAdornerPlacement = AdornedControl.AdornerPlacement.Inside;
     private double _offsetX = 0.0;
     private double _offsetY = 0.0;
-    private double _positionX = double.NaN;
-    private double _positionY = double.NaN;
+    //private double _positionX = double.NaN;
+    //private double _positionY = double.NaN;
 
     public FrameworkElementAdorner(FrameworkElement adornerChildElement, FrameworkElement adornedElement,
                                    AdornedControl.AdornerPlacement horizontalAdornerPlacement = AdornedControl.AdornerPlacement.Mouse, 
@@ -58,32 +58,12 @@ public class FrameworkElementAdorner : Adorner
     /// <summary>
     ///     Posición X del elemento hijo (cuando no está asignada a NaN)
     /// </summary>
-    public double PositionX
-    {
-        get
-        {
-            return _positionX;
-        }
-        set
-        {
-            _positionX = value;
-        }
-    }
+    public double PositionX { get; set; } = double.NaN;
 
     /// <summary>
     ///     Posición Y del elemento hijo (cuando no está asignada a NaN)
     /// </summary>
-    public double PositionY
-    {
-        get
-        {
-            return _positionY;
-        }
-        set
-        {
-            _positionY = value;
-        }
-    }
+    public double PositionY { get; set; } = double.NaN;
 
     protected override Size MeasureOverride(Size constraint)
     {
